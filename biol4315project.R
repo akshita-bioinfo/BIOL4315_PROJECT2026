@@ -26,7 +26,7 @@ files <- list.files("data",
                     full.names =TRUE)
 files
 
-#-------IN BASH: NANOPLOT------#
+#-------IN BASH: NANOPLOT-------#
 # pip install nanoplot
 # NanoPlot --fastq data/WA_final.fastq --outdir outputs/WA_nanoplot_report
 # NanoPlot --fastq data/HU_final.fastq --outdir outputs/HU_nanoplot_report
@@ -105,3 +105,10 @@ dir.create(path = "outputs/assembly" , showWarnings = TRUE)
 # -o outputs/busco_output/HU \
 # --auto-lineage-euk \
 # -m genome -c 8
+
+# VERSIONS OF TOOLS USED:
+# NanoPlot 1.48.0
+# Sequali 1.0.2
+# Filtlong v0.3.1
+# flye 2.9.6-b1802
+# medaka 2.2.1
