@@ -1,0 +1,58 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data/ 
+busco_downloads/
+# Ignore all output contents by default
+outputs/*
+
+# Allow main output directories
+!outputs/assembly/
+!outputs/busco_output/
+!outputs/QUAST_assembly_analysis/
+!outputs/WA_nanoplot_report/
+!outputs/HU_nanoplot_report/
+!outputs/WAsequali_reports/
+!outputs/HUsequali_reports/
+!outputs/sequali_filtered_files/
+
+# WA Flye: keep only log
+outputs/assembly/WA_flye_output/*
+!outputs/assembly/WA_flye_output/flye.log
+
+# HU Flye: keep only log
+outputs/assembly/HU_flye_output/*
+!outputs/assembly/HU_flye_output/flye.log
+
+# WA BUSCO: keep summary
+outputs/busco_output/WA/*
+!outputs/busco_output/WA/short_summary*.txt
+
+# HU BUSCO: keep summary
+outputs/busco_output/HU/*
+!outputs/busco_output/HU/short_summary*.txt
+
+# WA QUAST: keep HTML report
+outputs/QUAST_assembly_analysis/WA/*
+!outputs/QUAST_assembly_analysis/WA/report.html
+
+# HU QUAST: keep HTML report
+outputs/QUAST_assembly_analysis/HU/*
+!outputs/QUAST_assembly_analysis/HU/report.html
+
+# WA NanoPlot
+outputs/WA_nanoplot_report/*
+!outputs/WA_nanoplot_report/NanoPlot-report.html
+
+# HU NanoPlot
+outputs/HU_nanoplot_report/*
+!outputs/HU_nanoplot_report/NanoPlot-report.html
+
+# WA Sequali
+outputs/WAsequali_reports/*
+!outputs/WAsequali_reports/*.html
+
+# HU Sequali
+outputs/HUsequali_reports/*
+!outputs/HUsequali_reports/*.html

@@ -1,0 +1,39 @@
+# BUSCO version is: 6.0.0 
+# The lineage dataset is: saccharomycetes_odb12 (Creation date: 2026-05-22, number of genomes: 75, number of BUSCOs: 2319)
+# Summarized benchmarking in BUSCO notation for file /data/outputs/medaka_round2/HU/consensus.fasta
+# BUSCO was run in mode: euk_genome_min
+# Gene predictor used: miniprot
+
+	***** Results: *****
+
+	C:75.6%[S:75.5%,D:0.2%],F:2.1%,M:22.3%,n:2319,E:9.4%	   
+	1754	Complete BUSCOs (C)	(of which 165 contain internal stop codons)		   
+	1750	Complete and single-copy BUSCOs (S)	   
+	4	Complete and duplicated BUSCOs (D)	   
+	48	Fragmented BUSCOs (F)			   
+	517	Missing BUSCOs (M)			   
+	2319	Total BUSCO groups searched		   
+
+Assembly Statistics:
+	410	Number of scaffolds
+	410	Number of contigs
+	8974683	Total length
+	0.000%	Percent gaps
+	40 kbp	Scaffold N50
+	40 kbp	Contigs N50
+
+
+Dependencies and versions:
+	hmmsearch: 3.4
+	bbtools: None
+	miniprot_index: 0.17-r279
+	miniprot_align: 0.17-r279
+	sepp: 4.5.5
+
+Placement file versions:
+	list_of_reference_markers.eukaryota_odb12.2025-01-15.txt
+	tree.eukaryota_odb12.2025-01-15.nwk
+	tree_metadata.eukaryota_odb12.2025-01-15.txt
+	supermatrix.aln.eukaryota_odb12.2025-01-15.faa
+	mapping_taxids-busco_dataset_name.eukaryota_odb12.2025-01-15.txt
+	mapping_taxid-lineage.eukaryota_odb12.2025-01-15.txt
