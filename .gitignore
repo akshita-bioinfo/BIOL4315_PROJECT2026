@@ -3,6 +3,9 @@
 .RData
 .Ruserdata
 data/ 
+funannotate_db/
+funannotate-mask.log
+funannotate-setup.log
 busco_downloads/
 # Ignore all output contents by default
 outputs/*
@@ -37,9 +40,15 @@ outputs/busco_output/HU/*
 outputs/QUAST_assembly_analysis/WA/*
 !outputs/QUAST_assembly_analysis/WA/report.html
 
+outputs/QUAST_assembly_analysis/WA_ref/*
+!outputs/QUAST_assembly_analysis/WA_ref/report.html
+
 # HU QUAST: keep HTML report
 outputs/QUAST_assembly_analysis/HU/*
 !outputs/QUAST_assembly_analysis/HU/report.html
+
+outputs/QUAST_assembly_analysis/HU_ref/*
+!outputs/QUAST_assembly_analysis/HU_ref/report.html
 
 # WA NanoPlot
 outputs/WA_nanoplot_report/*

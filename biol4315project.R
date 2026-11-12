@@ -120,9 +120,21 @@ dir.create(path = "outputs/assembly" , showWarnings = TRUE)
 # -m genome -c 8
 
 #_________IN BASH: FUNANNOTATE___________#
-#______________W.anomalus________________#
 # PULL DOCKER IMAGE
-docker pull nextgenusfs/funannotate: v1.8.15
+# # PULL DOCKER IMAGE
+# docker pull --platform nextgenusfs/funannotate:v1.8.15
+
+# Install correct busco database
+docker run --rm \
+--platform linux/amd64 \
+-v "$PWD":/data \
+-w /data \
+nextgenusfs/funannotate:v1.8.15 \
+funannotate setup \
+-b saccharomycetes \
+-d /data/funannotate_db
+
+#______________W.anomalus________________#
 # Define reusable variables
 # IMAGE="nextgenusfs/funannotate:v1.8.15"
 # PLATFORM="--platform linux/amd64"
@@ -135,25 +147,25 @@ docker pull nextgenusfs/funannotate: v1.8.15
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate clean \
 # -i $INPUT \
-# -o data/WA_assembly_clean.fasta
+# -o outputs/funannotate/WA/assembly_clean.fasta
 
 # Step 2: Sort contigs by length and standardize header names (scaffold_1, etc.)
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate sort \
-# -i data/WA_assembly_clean.fasta \
-# -o data/WA_assembly_sorted.fasta
+# -i outputs/funannotate/WA/assembly_clean.fasta \
+# -o outputs/funannotate/WA/assembly_sorted.fasta
 
 # Step 3: Soft-mask repetitive elements
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate mask \
-# -i data/WA_assembly_sorted.fasta \
-# -o data/WA_assembly_masked.fasta \
+# -i  outputs/funannotate/WA/assembly_sorted.fasta \
+# -o d outputs/funannotate/WA/assembly_masked.fasta \
 # --cpus $CPUS
 
 # Step 4: Predict gene models using Saccharomycetes BUSCO models for training
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate predict \
-# -i data/WA_assembly_masked.fasta \
+# -i  outputs/funannotate/WA/WA_assembly_masked.fasta \
 # -o outputs/funannotate_out/WA \
 # -s "$SPECIES" \
 # --strain "$STRAIN" \
@@ -161,8 +173,6 @@ docker pull nextgenusfs/funannotate: v1.8.15
 # --cpus $CPUS
 
 #___________H.uvarum______________________#
-# PULL DOCKER IMAGE
-# docker pull nextgenusfs/funannotate: v1.8.15
 # Define reusable variables
 # IMAGE="nextgenusfs/funannotate:v1.8.15"
 # PLATFORM="--platform linux/amd64"
@@ -175,25 +185,25 @@ docker pull nextgenusfs/funannotate: v1.8.15
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate clean \
 # -i $INPUT \
-# -o data/HU_assembly_clean.fasta
+# -o outputs/funannotate/HU/assembly_clean.fasta
 
 # Step 2: Sort contigs by length and standardize header names (scaffold_1, etc.)
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate sort \
-# -i data/HU_assembly_clean.fasta \
-# -o data/HU_assembly_sorted.fasta
+# -i outputs/funannotate/HU/assembly_clean.fasta \
+# -o outputs/funannotate/HU/assembly_sorted.fasta
 
 # Step 3: Soft-mask repetitive elements
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate mask \
-# -i data/HU_assembly_sorted.fasta \
-# -o data/HU_assembly_masked.fasta \
+# -i outputs/funannotate/HU/assembly_sorted.fasta \
+# -o outputs/funannotate/HU/assembly_masked.fasta \
 # --cpus $CPUS
 
 # Step 4: Predict gene models using Saccharomycetes BUSCO models for training
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
 # funannotate predict \
-# -i data/HU_assembly_masked.fasta \
+# -i outputs/funannotate/HU/assembly_masked.fasta \
 # -o outputs/funannotate_out/HU \
 # -s "$SPECIES" \
 # --strain "$STRAIN" \

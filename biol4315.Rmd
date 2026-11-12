@@ -106,8 +106,10 @@ the consensus sequence.
 
 ## Assembly Quality Assessment
 
-QUAST BUSCO \## Genome Annotation Funannotate EggNog \## Comparative
-Functional Analysis
+QUAST 
+BUSCO 
+
+## Genome Annotation
 
 ## Computational Environment
 
