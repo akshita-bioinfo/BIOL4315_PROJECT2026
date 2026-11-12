@@ -1,0 +1,185 @@
+---
+title: "Comparative Genomic Analysis"
+author: "Akshita Sharma"
+date: "2026-11-12"
+output: html_document
+---
+
+## Quality assessment using sequali
+```{bash}
+conda activate sequali-env
+sequali --outdir outputs/WAsequali_reports/ data/WA_final.fastq
+sequali --outdir outputs/HUsequali_reports/ data/HU_final.fastq
+```
+
+## Filtering files using Filtlong
+```{bash}
+conda activate filtlong_env
+filtlong --keep_percent 75 data/WA_final.fastq > outputs/filtered_files/WA_filtlong_filtered_reads.fastq
+filtlong --keep_percent 75 data/Hu_final.fastq > outputs/filtered_files/HU_filtlong_filtered_reads.fastq
+```
+
+## Sequali on filtered files
+```{bash}
+sequali --outdir outputs/sequali_filtered_files/ outputs/filtered_files/WA_filtlong_filtered_reads.fastq
+sequali --outdir outputs/sequali_filtered_files/ outputs/filtered_files/HU_filtlong_filtered_reads.fastq
+```
+
+## Constructing assembly using Flye assembler
+```{bash}
+flye --nano-raw outputs/filtered_files/WA_filtlong_filtered_reads.fastq --out-dir outputs/assembly/WA_flye_output --threads 8 --genome-size 12m
+flye --nano-raw outputs/filtered_files/HU_filtlong_filtered_reads.fastq --out-dir outputs/assembly/HU_flye_output --threads 8 --genome-size 12m
+```
+
+## Polishing assembly using medaka
+### Two rounds of medaka polishing for W.anomalus
+```{bash}
+medaka_consensus -i data/WA_final.fastq -d outputs/assembly/WA_flye_output/assembly.fasta -o outputs/medaka_round1/WA -t 8
+medaka_consensus -i data/WA_final.fastq -d outputs/medaka_round1/WA/consensus.fasta -o outputs/medaka_round2/WA -t 8
+```
+
+### two rounds of medaka polishing for H.uvarum
+```{bash}
+medaka_consensus -i data/HU_final.fastq -d outputs/assembly/HU_flye_output/assembly.fasta -o outputs/medaka_round1/HU -t 8
+medaka_consensus -i data/HU_final.fastq -d outputs/medaka_round1/HU/consensus.fasta -o outputs/medaka_round2/HU -t 8
+```
+
+## Assembly analysis
+### Using QUAST (without Reference sequence) for W.anomalus
+```{bash}
+docker run --rm -v "$(pwd)":/data \
+-w/data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
+quast.py outputs/medaka_round2/WA/consensus.fasta \
+-o outputs/QUAST_assembly_analysis/WA
+```
+
+### Using QUAST (without Reference sequence) for H.uvarum
+```{bash}
+docker run --rm -v "$(pwd)":/data \
+-w/data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
+quast.py outputs/medaka_round2/HU/consensus.fasta \
+-o outputs/QUAST_assembly_analysis/HU
+```
+
+### Using QUAST (with reference sequence) for W.anomalus
+```{bash}
+docker run --rm -v "$(pwd)":/data -w /data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
+quast.py outputs/medaka_round2/WA/consensus.fasta \
+-r data/WA_ref.fna \
+-o outputs/QUAST_assembly_analysis/WA_ref
+```
+
+### Using QUAST (with reference sequence) for H.uvarum
+```{bash}
+docker run --rm -v "$(pwd)":/data -w /data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
+quast.py outputs/medaka_round2/HU/consensus.fasta \
+-r data/HU_ref.fna \
+-o outputs/QUAST_assembly_analysis/HU_ref
+```
+
+### Using BUSCO for W.anomalus
+```{bash}
+docker run --rm -v "$PWD":/data \
+-w /data ezlabgva/busco:v6.0.0_cv1 \
+busco -i outputs/medaka_round2/WA/consensus.fasta \
+-o outputs/busco_output/WA \
+--auto-lineage-euk \
+-m genome -c 8
+```
+
+### Using BUSCO for H.uvarum
+```{bash}
+docker run --rm -v "$PWD":/data \
+-w /data ezlabgva/busco:v6.0.0_cv1 \
+busco -i outputs/medaka_round2/HU/consensus.fasta \
+-o outputs/busco_output/HU \
+--auto-lineage-euk \
+-m genome -c 8
+```
+
+## Using Funannotate for W.anomalus
+```{bash}
+# PULL DOCKER IMAGE
+docker pull nextgenusfs/funannotate: v1.8.15
+# Define reusable variables
+IMAGE="nextgenusfs/funannotate:v1.8.15"
+PLATFORM="--platform linux/amd64"
+CPUS=8
+INPUT="outputs/medaka_round2/WA/consensus.fasta"
+SPECIES="Genus species"   # e.g., "Pichia kluyveri" or "Hanseniaspora uvarum"
+STRAIN="NK1"        # e.g., "RASPBERRY" or "NK1"
+
+# Step 1: Clean redundant/short contigs ("genomic dust")
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate clean \
+-i $INPUT \
+-o data/WA_assembly_clean.fasta
+
+# Step 2: Sort contigs by length and standardize header names (scaffold_1, etc.)
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate sort \
+-i data/WA_assembly_clean.fasta \
+-o data/WA_assembly_sorted.fasta
+
+# Step 3: Soft-mask repetitive elements
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate mask \
+-i data/WA_assembly_sorted.fasta \
+-o data/WA_assembly_masked.fasta \
+--cpus $CPUS
+
+# Step 4: Predict gene models using Saccharomycetes BUSCO models for training
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate predict \
+-i data/WA_assembly_masked.fasta \
+-o outputs/funannotate_out/WA \
+-s "$SPECIES" \
+--strain "$STRAIN" \
+--busco_db saccharomycetes \
+--cpus $CPUS
+```
+
+## Using Funannotate for H.uvarum
+```{bash}
+# PULL DOCKER IMAGE
+docker pull nextgenusfs/funannotate: v1.8.15
+# Define reusable variables
+IMAGE="nextgenusfs/funannotate:v1.8.15"
+PLATFORM="--platform linux/amd64"
+CPUS=8
+INPUT="outputs/medaka_round2/HU/consensus.fasta"
+SPECIES="Genus species"   # e.g., "Pichia kluyveri" or "Hanseniaspora uvarum"
+STRAIN="NK1"        # e.g., "RASPBERRY" or "NK1"
+
+# Step 1: Clean redundant/short contigs ("genomic dust")
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate clean \
+-i $INPUT \
+-o data/HU_assembly_clean.fasta
+
+# Step 2: Sort contigs by length and standardize header names (scaffold_1, etc.)
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate sort \
+-i data/HU_assembly_clean.fasta \
+-o data/HU_assembly_sorted.fasta
+
+# Step 3: Soft-mask repetitive elements
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate mask \
+-i data/HU_assembly_sorted.fasta \
+-o data/HU_assembly_masked.fasta \
+--cpus $CPUS
+
+# Step 4: Predict gene models using Saccharomycetes BUSCO models for training
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate predict \
+-i data/HU_assembly_masked.fasta \
+-o outputs/funannotate_out/HU \
+-s "$SPECIES" \
+--strain "$STRAIN" \
+--busco_db saccharomycetes \
+--cpus $CPUS
+```
+
+
+

@@ -77,20 +77,33 @@ dir.create(path = "outputs/assembly" , showWarnings = TRUE)
 # mkdir -p outputs/BUSCO_assembly_analysis/WA outputs/BUSCO_assembly_analysis/HU
 
 #_________QUAST (WITHOUT REF)___________#
-#_________W. Anomalus___________________#
+#_________W.anomalus____________________#
 # docker run --rm -v "$(pwd)":/data \
 # -w/data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
 # quast.py outputs/medaka_round2/WA/consensus.fasta \
 # -o outputs/QUAST_assembly_analysis/WA
 
-#_________H. Uvarum____________________#
+#__________H.uvarum_____________________#
 # docker run --rm -v "$(pwd)":/data \
 # -w/data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
 # quast.py outputs/medaka_round2/HU/consensus.fasta \
 # -o outputs/QUAST_assembly_analysis/HU
 
+#__________QUAST (WITH REF)___________#
+#__________W. Anomalus________________#
+# docker run --rm -v "$(pwd)":/data -w /data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
+# quast.py outputs/medaka_round2/WA/consensus.fasta \
+# -r data/WA_ref.fna \
+# -o outputs/QUAST_assembly_analysis/WA_ref
+
+#_________H. Uvarum_________________#
+# docker run --rm -v "$(pwd)":/data -w /data quay.io/biocontainers/quast:5.3.0--py313pl5321h5ca1c30_2 \
+# quast.py outputs/medaka_round2/HU/consensus.fasta \
+# -r data/HU_ref.fna \
+# -o outputs/QUAST_assembly_analysis/HU_ref
+
 #_____________BUSCO____________________#
-#_________W. Anomalus__________________#
+#__________W.anomalus__________________#
 # docker run --rm -v "$PWD":/data \
 # -w /data ezlabgva/busco:v6.0.0_cv1 \
 # busco -i outputs/medaka_round2/WA/consensus.fasta \
@@ -98,13 +111,95 @@ dir.create(path = "outputs/assembly" , showWarnings = TRUE)
 # --auto-lineage-euk \
 # -m genome -c 8
 
-#_________H. Uvarum____________________#
+#_________H.uvarum____________________#
 # docker run --rm -v "$PWD":/data \
 # -w /data ezlabgva/busco:v6.0.0_cv1 \
 # busco -i outputs/medaka_round2/HU/consensus.fasta \
 # -o outputs/busco_output/HU \
 # --auto-lineage-euk \
 # -m genome -c 8
+
+#_________IN BASH: FUNANNOTATE___________#
+#______________W.anomalus________________#
+# PULL DOCKER IMAGE
+docker pull nextgenusfs/funannotate: v1.8.15
+# Define reusable variables
+# IMAGE="nextgenusfs/funannotate:v1.8.15"
+# PLATFORM="--platform linux/amd64"
+# CPUS=8
+# INPUT="outputs/medaka_round2/WA/consensus.fasta"
+# SPECIES="Genus species"   # e.g., "Pichia kluyveri" or "Hanseniaspora uvarum"
+# STRAIN="NK1"        # e.g., "RASPBERRY" or "NK1"
+
+# Step 1: Clean redundant/short contigs ("genomic dust")
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate clean \
+# -i $INPUT \
+# -o data/WA_assembly_clean.fasta
+
+# Step 2: Sort contigs by length and standardize header names (scaffold_1, etc.)
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate sort \
+# -i data/WA_assembly_clean.fasta \
+# -o data/WA_assembly_sorted.fasta
+
+# Step 3: Soft-mask repetitive elements
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate mask \
+# -i data/WA_assembly_sorted.fasta \
+# -o data/WA_assembly_masked.fasta \
+# --cpus $CPUS
+
+# Step 4: Predict gene models using Saccharomycetes BUSCO models for training
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate predict \
+# -i data/WA_assembly_masked.fasta \
+# -o outputs/funannotate_out/WA \
+# -s "$SPECIES" \
+# --strain "$STRAIN" \
+# --busco_db saccharomycetes \
+# --cpus $CPUS
+
+#___________H.uvarum______________________#
+# PULL DOCKER IMAGE
+# docker pull nextgenusfs/funannotate: v1.8.15
+# Define reusable variables
+# IMAGE="nextgenusfs/funannotate:v1.8.15"
+# PLATFORM="--platform linux/amd64"
+# CPUS=8
+# INPUT="outputs/medaka_round2/HU/consensus.fasta"
+# SPECIES="Genus species"   # e.g., "Pichia kluyveri" or "Hanseniaspora uvarum"
+# STRAIN="AD"        # e.g., "RASPBERRY" or "NK1"
+
+# Step 1: Clean redundant/short contigs ("genomic dust")
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate clean \
+# -i $INPUT \
+# -o data/HU_assembly_clean.fasta
+
+# Step 2: Sort contigs by length and standardize header names (scaffold_1, etc.)
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate sort \
+# -i data/HU_assembly_clean.fasta \
+# -o data/HU_assembly_sorted.fasta
+
+# Step 3: Soft-mask repetitive elements
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate mask \
+# -i data/HU_assembly_sorted.fasta \
+# -o data/HU_assembly_masked.fasta \
+# --cpus $CPUS
+
+# Step 4: Predict gene models using Saccharomycetes BUSCO models for training
+# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+# funannotate predict \
+# -i data/HU_assembly_masked.fasta \
+# -o outputs/funannotate_out/HU \
+# -s "$SPECIES" \
+# --strain "$STRAIN" \
+# --busco_db saccharomycetes \
+# --cpus $CPUS
+
 
 # VERSIONS OF TOOLS USED:
 # NanoPlot 1.48.0

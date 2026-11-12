@@ -1,0 +1,118 @@
+---
+title: "Comparative Genomic Analysis"
+author: "Akshita Sharma"
+date: "2026-11-12"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+## Background
+
+### General Background
+
+Genomics is the study of an organism's complete genetic material, or
+genome. Rather than focusing on single genes, genomics investigates the
+gene function and interactions across the entire genome of an organism.
+Advances in sequencing technologies allow researchers to generate short
+or long DNA sequences called reads, which are further assembled to
+construct more complete genome sequence. Following genome assembly, the
+resulting sequence can be compared against reference genome to derive
+genes or variants of biological importance. Further, genome annotation
+is performed to identify genomic features and their functions. It
+includes structural annotation, which locates genes and other genomic
+components, as well as functional annotation, which assigns potential
+functions to existing genes by comparing them with known biological
+databases. This can help researchers to investigate the physiological
+functions of genes as well as identify metabolic pathways involved in
+biological processes, including production of metabolites that may
+contribute to microbial interactions. Furthermore, increasing the number
+of annotated genes in microorganisms such as yeasts can help researchers
+understand molecular mechanisms behind biocontrol activity. Microbial
+interactions play significant role in maintaining plant health because
+certain microorganisms can inhibit the growth of plant pathogens. In
+sustainable agricultural systems, biological control or bio-control uses
+beneficial organism or their metabolites to prevent or inhibit disease
+or pathogen causing disease. This practice has gained substantial
+attention as it does not involve use of chemicals to control the
+pathogenic effect. Among the microorganisms studied for biological
+control, yeasts have shown biocontrol potential through multiple
+mechanisms, including competition for nutrients and space, secretion of
+enzymes, toxin production and production of volatile organic compounds
+(VOCs). VOCs are small, volatile molecules with low water solubility and
+high vapor pressure. Example include ethanol, 3-methyl-1-butanol and
+2-phenylethanol (alcohols) as well s ethyl acetate and isoamyl acetate
+(esters). Yeast species can vary in these chemicals' relative quantity
+and composition. The production of VOCs in yeasts is associated with
+several metabolic pathways such as Ehrlich pathway and ester
+biosynthesis. These pathways are catalyzed by specific enzymes that
+convert biochemical precursors such as metabolites into volatile organic
+compounds, such as alcohols and esters. Variations in genes encoding
+these enzymes may contribute to differences in VOC-producing potential
+among different yeast strains.
+
+### Project-Specific Background
+
+## Methods
+
+## Sequencing Data and Provenance
+
+## Quality Assessment and read filtering
+
+The quality of Oxford Nanopore sequencing reads can vary, with read
+quality decreasing towards the end of individual reads. Therefore,
+assessing read quality before genome assembly and subsequent downstream
+analyses is an important step. Quality control was performed using
+Sequali (version 1.0.2), which was installed and executed in a dedicated
+Conda environment (sequali-env). The FASTQ files were provided as input
+to generate HTML reports containing sequencing statistics, including
+read length distribution, N50, mean read length, Q-scores and relative
+adapter contamination.
+
+Following the quality assessment, Filtlong (v0.3.1) was used to filter
+the long sequencing reads. Filtlong was installed and implemented in
+separate Conda environment (filtong_env). The --keep_percent 75
+parameter was used to retain the best 75 % of reads based on its quality
+and length ranking. The resulting filtered FASTQ files were reassessed
+using Sequali to inspect changes in sequencing quality as well as
+compare the data with the original FASTQ files. These filtered FASTQ
+files were used to construct genome assembly.
+
+## Genome Assembly
+
+Genome assembly is the process of aligning and merging millions of
+fragmented DNA reads to reconstruct continuous genome sequence. Flye
+(2.9.6-bi802), a de novo assembler was installed and implemented in new
+Conda environment (flye_env) to complete genome assembly. The --nano-raw
+parameter tells Flye that the input reads are raw Oxford Nanopore
+sequencing reads. Flye was aimed at locating overlaps, constructing
+genome graph, resolve genomic structures and generate contigs for
+subsequent analysis.
+
+## Genome Polishing
+
+The resulting contigs from genome assembly may contain errors due to
+imprecisions in long-read sequencing. Genome polishing involves
+comparing the original sequencing reads against the assembled contigs to
+identify and rectify potential errors in the consensus sequence. Two
+rounds of polishing were performed using Medaka (version 2.2.1) to
+achieve accurate genome assemblies. Medaka was equipped and executed in
+a separate Conda environment (medaka_final). The first round of Medaka
+was performed on assembled FASTA files and corresponding sequencing
+reads. The second round of polishing was conducted over polished files
+from Medaka round 1 and respective sequencing reads to further refine
+the consensus sequence.
+
+## Assembly Quality Assessment
+
+QUAST BUSCO \## Genome Annotation Funannotate EggNog \## Comparative
+Functional Analysis
+
+## Computational Environment
+
+## Results
+
+## Discussion
+
+## References
