@@ -65,3 +65,31 @@ outputs/WAsequali_reports/*
 # HU Sequali
 outputs/HUsequali_reports/*
 !outputs/HUsequali_reports/*.html
+
+ Funannotate WA - ignore everything by default
+outputs/funannotate_out/WA_prediction/*
+
+# Keep prediction log
+!outputs/funannotate_out/WA_prediction/logfiles/
+outputs/funannotate_out/WA_prediction/logfiles/*
+!outputs/funannotate_out/WA_prediction/logfiles/funannotate-predict.log
+
+# Keep final prediction results
+!outputs/funannotate_out/WA_prediction/predict_results/
+outputs/funannotate_out/WA_prediction/predict_results/*
+!outputs/funannotate_out/WA_prediction/predict_results/*.gff3
+!outputs/funannotate_out/WA_prediction/predict_results/*.proteins.fa
+
+# Funannotate HU - ignore everything by default
+outputs/funannotate_out/HU_prediction/*
+
+# Keep prediction log
+!outputs/funannotate_out/HU_prediction/logfiles/
+outputs/funannotate_out/HU_prediction/logfiles/*
+!outputs/funannotate_out/HU_prediction/logfiles/funannotate-predict.log
+
+# Keep final prediction results
+!outputs/funannotate_out/HU_prediction/predict_results/
+outputs/funannotate_out/HU_prediction/predict_results/*
+!outputs/funannotate_out/HU_prediction/predict_results/*.gff3
+!outputs/funannotate_out/HU_prediction/predict_results/*.proteins.fa

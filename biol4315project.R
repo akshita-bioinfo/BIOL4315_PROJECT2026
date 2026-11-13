@@ -121,14 +121,18 @@ dir.create(path = "outputs/assembly" , showWarnings = TRUE)
 
 #_________IN BASH: FUNANNOTATE___________#
 # PULL DOCKER IMAGE
-# # PULL DOCKER IMAGE
 # docker pull --platform nextgenusfs/funannotate:v1.8.15
+
+#_________CHECKPOINTS (before funannotate)___________#
+# docker run --rm --platform linux/amd64 -v "$PWD":/data -e FUNANNOTATE_DB=/data/funannotate_db nextgenusfs/funannotate:v1.8.15 funannotate --version
+# asharma033$ docker run --rm --platform linux/amd64 -v "$PWD":/data -e FUNANNOTATE_DB=/data/funannotate_db nextgenusfs/funannotate:v1.8.15 ls /data/funannotate_db
 
 # Install correct busco database
 docker run --rm \
 --platform linux/amd64 \
 -v "$PWD":/data \
--w /data \
+-e FUNANNOTATE_DB=/data/
+funannotate_db \
 nextgenusfs/funannotate:v1.8.15 \
 funannotate setup \
 -b saccharomycetes \
@@ -156,11 +160,11 @@ funannotate setup \
 # -o outputs/funannotate/WA/assembly_sorted.fasta
 
 # Step 3: Soft-mask repetitive elements
-# docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
-# funannotate mask \
-# -i  outputs/funannotate/WA/assembly_sorted.fasta \
-# -o d outputs/funannotate/WA/assembly_masked.fasta \
-# --cpus $CPUS
+docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
+funannotate mask \
+-i  outputs/funannotate/WA/assembly_sorted.fasta \
+-o outputs/funannotate/WA/assembly_masked.fasta \
+--cpus $CPUS
 
 # Step 4: Predict gene models using Saccharomycetes BUSCO models for training
 # docker run -u $(id -u):$(id -g) --rm -v "$PWD":/data -w /data $PLATFORM $IMAGE \
