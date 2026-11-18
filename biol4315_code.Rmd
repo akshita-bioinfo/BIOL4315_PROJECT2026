@@ -119,8 +119,25 @@ docker pull nextgenusfs/funannotate:v1.8.15
 docker run --rm --platform linux/amd64 -v "$PWD":/data -e FUNANNOTATE_DB=/data/funannotate_db nextgenusfs/funannotate:v1.8.15 funannotate setup -i busco -b saccharomycetes -d /data/funannotate_db
 
 # check if database installed
-docker run --rm --platform linux/amd64 -v "$PWD":/data -e FUNANNOTATE_DB=/data/funannotate_db nextgenusfs/funannotate:v1.8.15 funannotate database --show-buscos
-ls -lah saccharomycetes
+docker run --rm --platform linux/amd64 \
+-v "$PWD":/data -w /data \
+-e FUNANNOTATE_DB=/data/funannotate_db \
+nextgenusfs/funannotate:v1.8.15 \
+funannotate database --show-versions
+
+# Inspect lineage contents
+docker run --rm --platform linux/amd64 \
+-v "$PWD":/data -w /data \
+-e FUNANNOTATE_DB=/data/funannotate_db \
+nextgenusfs/funannotate:v1.8.15 \
+bash -c 'ls -lah /data/funannotate_db && find /data/funannotate_db -iname "*saccharomycetes*"'
+
+# check if Saccharomycetes BUSCO lineage is populated
+docker run --rm --platform linux/amd64 \
+-v "$PWD":/data \
+-e FUNANNOTATE_DB=/data/funannotate_db \
+nextgenusfs/funannotate:v1.8.15 \
+bash -c 'ls -lah /data/funannotate_db/saccharomycetes'
 ```
 
 ### Using Funannotate for W.anomalus
@@ -153,10 +170,15 @@ funannotate mask \
 --cpus $CPUS
 
 # Step 4: Predict gene models using Saccharomycetes BUSCO models for training
-docker run --rm --platform linux/amd64 -u 0:0 -v "$PWD":/data -w /data \
--e FUNANNOTATE_DB=/data/funannotate_db nextgenusfs/funannotate:v1.8.15 funannotate predict -i outputs/funannotate/WA/assembly_masked.fasta \
--o outputs/funannotate_out/WA_prediction \
--s "$SPECIES" \
+docker run --rm --platform linux/amd64 -u 0:0 \
+-v "$PWD":/data -w /data \
+-e FUNANNOTATE_DB=/data/funannotate_db \
+nextgenusfs/funannotate:v1.8.15 \
+funannotate predict \
+-i outputs/funannotate/WA/assembly_masked.fasta \
+-o outputs/funannotate_out/WA_prediction_corrected \
+-s "Wickerhamomyces anomalus" \
+--strain "NK1" \
 --busco_db saccharomycetes \
 --cpus 8
 ```
@@ -191,7 +213,21 @@ funannotate mask \
 --cpus $CPUS
 
 # Step 4: Predict gene models using Saccharomycetes BUSCO models for training
-docker run --rm --platform linux/amd64 -u 0:0 -v "$PWD":/data -w /data -e FUNANNOTATE_DB=/data/funannotate_db nextgenusfs/funannotate:v1.8.15 funannotate predict -i outputs/funannotate/HU/assembly_masked.fasta -o outputs/funannotate_out/WA_prediction -s "$SPECIES" --strain "$STRAIN" --busco_db saccharomycetes --cpus 8
+docker run --rm --platform linux/amd64 -u 0:0 -v "$PWD":/data -w /data -e FUNANNOTATE_DB=/data/funannotate_db nextgenusfs/funannotate:v1.8.15 
+funannotate predict \
+-i outputs/funannotate/HU/assembly_masked.fasta \
+-o outputs/funannotate_out/WA_prediction \
+-s "$SPECIES" \
+--strain "$STRAIN" \
+--busco_db saccharomycetes \
+--cpus 8
+```
+
+
+## Verifyng funannotate predict
+```{bash}
+grep -v '^#' outputs/funannotate_out/WA_prediction/predict_results/*.gff3 | cut -f3 | sort | uniq -c
+grep -v '^#' outputs/funannotate_out/HU_prediction/predict_results/*.gff3 | cut -f3 | sort | uniq -c
 ```
 
 ## eggNOG-mapper via conda
@@ -218,4 +254,103 @@ emapper.py \
   --excel \
   -m diamond \
   --cpu 8
+```
+
+
+## Interpreting funannotate results
+### Using ggplot2
+```{r}
+ibrary(tidyverse)
+library(GO.db)
+library(AnnotationDbi)
+
+eggnog_data <- read_tsv("funannotate_out/isolate_functional.emapper.annotations", comment = "##", show_col_types = FALSE) %>%
+  rename(query = `#query`)
+
+go_long <- eggnog_data %>%
+  filter(GOs != "-" & !is.na(GOs)) %>%
+  separate_rows(GOs, sep = ",")
+
+go_lookup <- AnnotationDbi::select(GO.db, keys = unique(go_long$GOs), columns = c("TERM", "ONTOLOGY"), keytype = "GOID")
+go_annotated <- left_join(go_long, go_lookup, by = c("GOs" = "GOID"))
+
+top_bp <- go_annotated %>%
+  filter(ONTOLOGY == "BP", !is.na(TERM)) %>%
+  count(TERM, sort = TRUE) %>%
+  slice_head(n = 10)
+
+ggplot(top_bp, aes(x = reorder(TERM, n), y = n)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Top 10 Biological Process (BP) GO Terms", x = "GO Term", y = "Gene Count")
+```
+
+### Using ggVennDiagram
+library(ggVennDiagram)
+
+annotation_list <- list(
+  Isolate_A = eggnog_isolateA,
+  Isolate_B = eggnog_isolateB
+)
+
+gene_sets <- lapply(annotation_list, function(df) {
+  unique(df$Preferred_name[!is.na(df$Preferred_name) & df$Preferred_name != "-"])
+})
+
+ggVennDiagram(gene_sets) +
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  labs(title = "Shared vs. Unique Annotated Gene Names")
+  
+## Installation via Conda
+```{bash}
+conda create -n medaka_env -c bioconda -c conda-forge medaka
+conda create -n variant_env -c bioconda -c conda-forge minimap2 samtools bcftools bedtools snpeff htslib
+```
+
+## Calling and Filtering variants
+```{bash}
+# 1. Call variants with medaka
+conda activate medaka_env
+medaka_variant -i data/reads.fastq.gz -r data/reference_genome.fasta -o variant_output -t 8
+
+# 2. Filter weak calls (QUAL >= 20)
+conda activate variant_env
+bcftools filter -i 'QUAL >= 20' -o variant_output/filtered.vcf variant_output/medaka.vcf
+
+# 3. Generate summary statistics & check Ts/Tv
+bcftools stats variant_output/filtered.vcf > variant_output/filtered_stats.txt
+grep -A1 '^# TSTV' variant_output/filtered_stats.txt
+```
+
+## Predicting Biological impact with SnpEff
+```{bash}
+mkdir -p snpeff_data/my_yeast_ref
+cp data/reference_genome.fasta snpeff_data/my_yeast_ref/sequences.fa
+cp data/reference_genes.gff3 snpeff_data/my_yeast_ref/genes.gff
+
+cat <<EOF > snpEff.config
+data.dir = ./snpeff_data
+my_yeast_ref.genome : My_Wild_Yeast_Reference
+EOF
+
+snpEff build -gff3 -v -c snpEff.config -noCheckCds -noCheckProtein my_yeast_ref
+snpEff -c snpEff.config my_yeast_ref variant_output/filtered.vcf > variant_output/annotated.vcf
+```
+
+## Connecting SnpEff to eggNOG-mapper Pathways in R
+```{r}
+library(tidyverse)
+
+eggnog_ref <- read_tsv("funannotate_out/isolate_functional.emapper.annotations", comment = "##", show_col_types = FALSE) %>%
+  rename(query = `#query`)
+
+snpeff_genes <- read_tsv("snpEff_genes.txt", skip = 1, show_col_types = FALSE) %>%
+  rename(GeneName = `#GeneName`)
+
+variants_with_function <- inner_join(snpeff_genes, eggnog_ref, by = c("TranscriptId" = "query"))
+
+candidate_mutated_genes <- variants_with_function %>%
+  filter(variants_impact_HIGH > 0 | variants_impact_MODERATE > 0) %>%
+  select(GeneName, TranscriptId, Preferred_name, variants_impact_HIGH, variants_impact_MODERATE, COG_category, KEGG_Pathway, GOs, Description)
 ```
