@@ -101,15 +101,16 @@ outputs/funannotate_out/HU_prediction/predict_results/*
 # Ignore all eggNOG output contents by default
 outputs/egg_out/WA/*
 
-# Keep final annotation files
-!outputs/egg_out/WA/*.emapper.annotations
-!outputs/egg_out/WA/*.emapper.seed_orthologs
+# Keep functional annotation results
+!outputs/egg_out/WA/WA_functional.emapper.annotations
+!outputs/egg_out/WA/WA_functional.emapper.seed_orthologs
+!outputs/egg_out/WA/WA_functional.emapper.hits
+!outputs/egg_out/WA/WA_functional.emapper.decorated.gff
+!outputs/egg_out/WA/WA_functional.emapper.annotations.xlsx
 
-# Keep decorated GFF, if generated
-!outputs/egg_out/WA/*.emapper.genepred.gff
+# Ignore temporary Excel lock files
+outputs/egg_out/WA/~$*
 
-# Keep annotation summary CSV files
-!outputs/egg_out/WA/*.csv
 
 
 
