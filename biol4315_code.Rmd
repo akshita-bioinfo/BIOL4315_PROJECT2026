@@ -274,35 +274,215 @@ emapper.py \
 ```
   
 ## Interpreting funannotate results
-### Using ggplot2
-```{r}
-ibrary(tidyverse)
+### Loading required libraries
+library(tidyverse)
 library(GO.db)
 library(AnnotationDbi)
 
-eggnog_data <- read_tsv("funannotate_out/isolate_functional.emapper.annotations", comment = "##", show_col_types = FALSE) %>%
-  rename(query = `#query`)
+## Checking eggNOG annotatio for W.anomalus
+### Read eggNOG annotations
+```{r}
+eggnog_data <- read_tsv(
+  "outputs/egg_out/WA/WA_functional.emapper.annotations",
+  comment = "##",
+  show_col_types = FALSE
+) %>%
+  rename_with(~ str_remove(.x, "^#"))
 
-go_long <- eggnog_data %>%
-  filter(GOs != "-" & !is.na(GOs)) %>%
-  separate_rows(GOs, sep = ",")
+# 2. Search protein descriptions and preferred names
+voc_candidates <- eggnog_data %>%
+  filter(
+    str_detect(
+      str_to_lower(paste(Preferred_name, Description)),
+      "acetyltransferase|eat1|ester|alcohol dehydrogenase|aldehyde dehydrogenase|acetyl-coa|pyruvate|aminotransferase|decarboxylase"
+    )
+  ) %>%
+  dplyr::select(
+    query,
+    Preferred_name,
+    Description,
+    EC,
+    KEGG_ko,
+    KEGG_Pathway,
+    PFAMs
+  ) %>%
+  distinct()
 
-go_lookup <- AnnotationDbi::select(GO.db, keys = unique(go_long$GOs), columns = c("TERM", "ONTOLOGY"), keytype = "GOID")
-go_annotated <- left_join(go_long, go_lookup, by = c("GOs" = "GOID"))
-
-top_bp <- go_annotated %>%
-  filter(ONTOLOGY == "BP", !is.na(TERM)) %>%
-  count(TERM, sort = TRUE) %>%
-  slice_head(n = 10)
-
-ggplot(top_bp, aes(x = reorder(TERM, n), y = n)) +
-  geom_col(fill = "steelblue") +
-  coord_flip() +
-  theme_minimal() +
-  labs(title = "Top 10 Biological Process (BP) GO Terms", x = "GO Term", y = "Gene Count")
+print(voc_candidates, n = 30)
 ```
 
+### save results
+```{r}
+write_csv(voc_candidates, "outputs/egg_out/results/WA_VOC_candidate_genes.csv")
+```
+
+```{r}
+capture.output(
+  print(voc_candidates, n = Inf),
+  file = "outputs/egg_out/results/WA_VOC_candidate_genes.txt"
+)
+```
+
+## Checking eggNOG annotations for H.uvarum
+### Read eggNOG annotations
+```{r}
+hu_data <- read_tsv(
+  "outputs/egg_out/HU/HU_functional.emapper.annotations",
+  comment = "##",
+  show_col_types = FALSE
+) %>%
+  rename_with(~ str_remove(.x, "^#"))
+  hu_candidates <- hu_data %>%
+  filter(
+    str_detect(
+      str_to_lower(paste(Preferred_name, Description)),
+      "acetyltransferase|eat1|ester|alcohol dehydrogenase|aldehyde dehydrogenase|acetyl-coa|pyruvate|aminotransferase|decarboxylase"
+    )
+  ) %>%
+  dplyr::select(
+    query,
+    Preferred_name,
+    Description,
+    EC,
+    KEGG_ko,
+    KEGG_Pathway,
+    PFAMs
+  ) %>%
+distinct()
+print(voc_candidates, n = 30)
+```
+
+### save results
+```{r}
+write_csv(voc_candidates, "outputs/egg_out/results/HU_VOC_candidate_genes.csv")
+```
+
+```{r}
+capture.output(
+  print(voc_candidates, n = Inf),
+  file = "outputs/egg_out/results/HU_VOC_candidate_genes.txt"
+)
+```
+
+### Using ggplot2
+```{r}
+library(tidyverse)
+library(GO.db)
+library(AnnotationDbi)
+
+# Combine both isolates
+combined_data <- bind_rows(
+  WA = eggnog_data,
+  HU = hu_data,
+  .id = "Isolate"
+)
+
+# Extract GO terms
+go_long <- combined_data %>%
+  filter(!is.na(GOs), GOs != "-") %>%
+  separate_rows(GOs, sep = ",")
+
+go_lookup <- AnnotationDbi::select(
+  GO.db,
+  keys = unique(go_long$GOs),
+  columns = c("TERM", "ONTOLOGY"),
+  keytype = "GOID"
+)
+
+go_annotated <- left_join(
+  go_long,
+  go_lookup,
+  by = c("GOs" = "GOID")
+)
+
+voc_go <- go_annotated %>%
+  filter(
+    ONTOLOGY == "BP",
+    str_detect(
+      str_to_lower(TERM),
+      "ester biosynthetic process|ester metabolic process|alcohol biosynthetic process|alcohol metabolic process|aldehyde biosynthetic process|aldehyde metabolic process|acetyl-coa metabolic process|acetyl-coa biosynthetic process|pyruvate metabolic process|branched-chain amino acid metabolic process|organic acid metabolic process"
+    )
+  ) %>%
+  distinct(Isolate, query, TERM)
+
+voc_go_counts <- voc_go %>%
+  count(TERM, Isolate)
+
+ggplot(voc_go_counts,
+       aes(x = reorder(TERM, n), y = n, fill = Isolate)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "VOC-Related Biological Processes in WA and HU",
+    x = "Biological Process",
+    y = "Number of Annotated Genes",
+    fill = "Isolate"
+  )
+```
+```{r}
+library(tidyverse)
+library(GO.db)
+library(AnnotationDbi)
+
+# Combine both isolates
+combined_data <- bind_rows(
+  WA = eggnog_data,
+  HU = hu_data,
+  .id = "Isolate"
+)
+
+# Extract GO terms
+go_long <- combined_data %>%
+  filter(!is.na(GOs), GOs != "-") %>%
+  separate_rows(GOs, sep = ",")
+
+go_lookup <- AnnotationDbi::select(
+  GO.db,
+  keys = unique(go_long$GOs),
+  columns = c("TERM", "ONTOLOGY"),
+  keytype = "GOID"
+)
+
+go_annotated <- left_join(
+  go_long,
+  go_lookup,
+  by = c("GOs" = "GOID")
+)
+
+voc_go <- go_annotated %>%
+  filter(
+    ONTOLOGY == "BP",
+    str_detect(
+      str_to_lower(TERM),
+            "ethyl acetate biosynthetic process|ethyl acetate metabolic process|alcohol O-acetyltransferase activity|acyltransferase activity|hydrolase activity|alcohol biosynthetic process|branched-chain amino acid catabolic process|L-phenylalanine catabolic process|tyrosine catabolic process|alcohol dehydrogenase activity|3-methyl-2-oxobutane dehydrogenase|branched-chain-amino-acid transaminase activity"
+    )
+  ) %>%
+  distinct(Isolate, query, TERM)
+
+voc_go_counts <- voc_go %>%
+  count(TERM, Isolate)
+
+ggplot(voc_go_counts,
+       aes(x = reorder(TERM, n), y = n, fill = Isolate)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "VOC-Related Biological Processes in WA and HU",
+    x = "Biological Process",
+    y = "Number of Annotated Genes",
+    fill = "Isolate"
+  )
+```
+"ethyl acetate biosynthetic process|ethyl acetate metabolic process|alcohol O-acetyltransferase activity|acyltransferase activity|hydrolase activity|alcohol biosynthetic process|branched-chain amino acid catabolic process|L-phenylalanine catabolic process|tyrosine catabolic process|alcohol dehydrogenase activity|3-methyl-2-oxobutane dehydrogenase|branched-chain-amino-acid transaminase activity"
+
+"eat1|eath|ethanol acetyltransferase|alcohol acetyltransferase|acetyltransferase|alpha/beta hydrolase|esterase"
+
+"
+
 ### Using ggVennDiagram
+```{r}
 library(ggVennDiagram)
 
 annotation_list <- list(
@@ -317,7 +497,8 @@ gene_sets <- lapply(annotation_list, function(df) {
 ggVennDiagram(gene_sets) +
   scale_fill_gradient(low = "white", high = "steelblue") +
   labs(title = "Shared vs. Unique Annotated Gene Names")
-  
+```
+
 ## Installation via Conda
 ```{bash}
 conda create -n medaka_env -c bioconda -c conda-forge medaka

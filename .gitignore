@@ -108,6 +108,17 @@ outputs/egg_out/WA/*
 !outputs/egg_out/WA/WA_functional.emapper.decorated.gff
 !outputs/egg_out/WA/WA_functional.emapper.annotations.xlsx
 
+# Ignore all eggNOG output contents by default
+outputs/egg_out/HU/*
+
+# Keep functional annotation results
+!outputs/egg_out/HU/HU_functional.emapper.annotations
+!outputs/egg_out/HU/HU_functional.emapper.seed_orthologs
+!outputs/egg_out/HU/HU_functional.emapper.hits
+!outputs/egg_out/HU/HU_functional.emapper.decorated.gff
+!outputs/egg_out/HU/HU_functional.emapper.annotations.xlsx
+
+!outputs/egg_out/results
 # Ignore temporary Excel lock files
 outputs/egg_out/WA/~$*
 
