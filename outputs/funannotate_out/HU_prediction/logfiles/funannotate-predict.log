@@ -1,0 +1,2163 @@
+[11/13/26 03:24:42]: /venv/bin/funannotate predict -i outputs/funannotate/HU/assembly_masked.fasta -o outputs/funannotate_out/HU_prediction -s Hanseniaspora uvarum --strain AD --busco_db saccharomycetes --cpus 8
+
+[11/13/26 03:24:42]: OS: Debian GNU/Linux 10, 8 cores, ~ 8 GB RAM. Python: 3.8.12
+[11/13/26 03:24:42]: Running funannotate v1.8.15
+[11/13/26 03:24:42]: GeneMark not found and $GENEMARK_PATH environmental variable missing. Will skip GeneMark ab-initio prediction.
+[11/13/26 03:24:42]: exonerate version=exonerate 2.4.0 path=/venv/bin/exonerate
+[11/13/26 03:24:42]: diamond version=2.1.6 path=/venv/bin/diamond
+[11/13/26 03:24:42]: tbl2asn version=25.8 path=/venv/bin/tbl2asn
+[11/13/26 03:24:42]: bedtools version=bedtools v2.30.0 path=/venv/bin/bedtools
+[11/13/26 03:24:42]: augustus version=3.3.2 path=/usr/bin/augustus
+[11/13/26 03:24:42]: etraining version=NA path=/usr/bin/etraining
+[11/13/26 03:24:42]: tRNAscan-SE version=2.0.9 (July 2021) path=/venv/bin/tRNAscan-SE
+[11/13/26 03:24:42]: bam2hints version=NA path=/usr/bin/bam2hints
+[11/13/26 03:24:42]: minimap2 version=2.24-r1122 path=/venv/bin/minimap2
+[11/13/26 03:24:42]: $AUGUSTUS_CONFIG_PATH=/usr/share/augustus/config
+[11/13/26 03:24:43]: {'augustus': 1, 'hiq': 2, 'genemark': 0, 'pasa': 6, 'codingquarry': 0, 'snap': 1, 'glimmerhmm': 1, 'proteins': 1, 'transcripts': 1}
+[11/13/26 03:24:43]: Skipping CodingQuarry as no --rna_bam passed
+[11/13/26 03:24:43]: {'augustus': 'busco', 'snap': 'busco', 'glimmerhmm': 'busco'}
+[11/13/26 03:24:43]: Parsed training data, run ab-initio gene predictors as follows:
+[11/13/26 03:24:43]: augustus --species=anidulans --proteinprofile=/venv/lib/python3.8/site-packages/funannotate/config/EOG092C0B3U.prfl /venv/lib/python3.8/site-packages/funannotate/config/busco_test.fa
+[11/13/26 03:24:43]: {'augustus': 1, 'hiq': 2, 'genemark': 0, 'pasa': 6, 'codingquarry': 0, 'snap': 1, 'glimmerhmm': 1, 'proteins': 1, 'transcripts': 1}
+[11/13/26 03:24:44]: Loading genome assembly and parsing soft-masked repetitive sequences
+[11/13/26 03:24:46]: Genome loaded: 410 scaffolds; 8,974,683 bp; 6.76% repeats masked
+[11/13/26 04:20:35]: /usr/share/augustus/scripts/join_mult_hints.pl
+[11/13/26 04:20:35]: Running BUSCO to find conserved gene models for training ab-initio predictors
+[11/13/26 04:20:35]: /venv/bin/python /venv/lib/python3.8/site-packages/funannotate/aux_scripts/funannotate-BUSCO2.py -i /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa -m genome --lineage /data/funannotate_db/saccharomycetes -o hanseniaspora_uvarum_ad -c 8 --species anidulans -f --local_augustus /data/outputs/funannotate_out/HU_prediction/predict_misc/ab_initio_parameters/augustus
+[11/13/26 04:31:48]: 377 valid BUSCO predictions found, validating protein sequences
+[11/13/26 04:32:55]: 372 BUSCO predictions validated
+[11/13/26 04:32:55]: Training Augustus using BUSCO gene models
+[11/13/26 04:32:55]: /usr/share/augustus/scripts/gff2gbSmallDNA.pl outputs/funannotate_out/HU_prediction/predict_misc/busco.final.gff3 /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa 600 outputs/funannotate_out/HU_prediction/predict_misc/augustus.training.busco.gb
+[11/13/26 04:33:03]: Augustus initial training results:
+[11/13/26 04:33:03]: Accuracy seems low, you can try to improve by passing the --optimize_augustus option.
+[11/13/26 04:33:03]: Running Augustus gene prediction using hanseniaspora_uvarum_ad parameters
+[11/13/26 04:34:29]: perl /venv/opt/evidencemodeler-1.1.1/EvmUtils/misc/augustus_GFF3_to_EVM_GFF3.pl outputs/funannotate_out/HU_prediction/predict_misc/augustus.gff3
+[11/13/26 04:34:29]: Pulling out high quality Augustus predictions
+[11/13/26 04:34:30]: Found 41 high quality predictions from Augustus (>90% exon evidence)
+[11/13/26 04:34:30]: Running SNAP gene prediction, using training data: outputs/funannotate_out/HU_prediction/predict_misc/busco.final.gff3
+[11/13/26 04:34:30]: 372 gene models to train snap on 165 scaffolds
+[11/13/26 04:34:30]: fathom /data/outputs/funannotate_out/HU_prediction/predict_misc/snap.training.zff /data/outputs/funannotate_out/HU_prediction/predict_misc/snap-training.scaffolds.fasta -categorize 1000 -min-intron 10 -max-intron 3000
+[11/13/26 04:34:31]: fathom uni.ann uni.dna -export 1000 -plus
+[11/13/26 04:34:31]: forge export.ann export.dna
+[11/13/26 04:34:35]: perl /usr/bin/hmm-assembler.pl snap-trained outputs/funannotate_out/HU_prediction/predict_misc/snaptrain
+[11/13/26 04:34:35]: snap /data/outputs/funannotate_out/HU_prediction/predict_misc/snap-trained.hmm /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa
+[11/13/26 04:34:59]: scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding.10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding10.20.30.40.50.60.70.80.90.100 done
+scoring....decoding10.20.30.40.50.60.70.80.90100 done
+scoring....decoding10.20.30.40.50.60.70.80.90100 done
+
+[11/13/26 04:35:01]: 2,998 predictions from SNAP
+[11/13/26 04:35:01]: Running GlimmerHMM gene prediction, using training data: outputs/funannotate_out/HU_prediction/predict_misc/busco.final.gff3
+[11/13/26 04:35:01]: trainGlimmerHMM /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa /data/outputs/funannotate_out/HU_prediction/predict_misc/glimmer.exons -d outputs/funannotate_out/HU_prediction/predict_misc/glimmerhmm
+[11/13/26 04:38:22]: perl /venv/bin/glimmhmm.pl /venv/bin/glimmerhmm /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa /data/outputs/funannotate_out/HU_prediction/predict_misc/glimmerhmm -g
+[11/13/26 04:39:04]: Process scaffold_1
+Done 241443 bp
+Done scaffold_1
+Process scaffold_2
+Done 176828 bp
+Done scaffold_2
+Process scaffold_3
+Done 163619 bp
+Done scaffold_3
+Process scaffold_4
+Done 149135 bp
+Done scaffold_4
+Process scaffold_5
+Done 142899 bp
+Done scaffold_5
+Process scaffold_6
+Done 140809 bp
+Done scaffold_6
+Process scaffold_7
+Done 136978 bp
+Done scaffold_7
+Process scaffold_8
+Done 117769 bp
+Done scaffold_8
+Process scaffold_9
+Done 110193 bp
+Done scaffold_9
+Process scaffold_10
+Done 92107 bp
+Done scaffold_10
+Process scaffold_11
+Done 90188 bp
+Done scaffold_11
+Process scaffold_12
+Done 85753 bp
+Done scaffold_12
+Process scaffold_13
+Done 81506 bp
+Done scaffold_13
+Process scaffold_14
+Done 79754 bp
+Done scaffold_14
+Process scaffold_15
+Done 77661 bp
+Done scaffold_15
+Process scaffold_16
+Done 76970 bp
+Done scaffold_16
+Process scaffold_17
+Done 74230 bp
+Done scaffold_17
+Process scaffold_18
+Done 72041 bp
+Done scaffold_18
+Process scaffold_19
+Done 71292 bp
+Done scaffold_19
+Process scaffold_20
+Done 71139 bp
+Done scaffold_20
+Process scaffold_21
+Done 69846 bp
+Done scaffold_21
+Process scaffold_22
+Done 68589 bp
+Done scaffold_22
+Process scaffold_23
+Done 68443 bp
+Done scaffold_23
+Process scaffold_24
+Done 65429 bp
+Done scaffold_24
+Process scaffold_25
+Done 65424 bp
+Done scaffold_25
+Process scaffold_26
+Done 63880 bp
+Done scaffold_26
+Process scaffold_27
+Done 63547 bp
+Done scaffold_27
+Process scaffold_28
+Done 63096 bp
+Done scaffold_28
+Process scaffold_29
+Done 62365 bp
+Done scaffold_29
+Process scaffold_30
+Done 61537 bp
+Done scaffold_30
+Process scaffold_31
+Done 60717 bp
+Done scaffold_31
+Process scaffold_32
+Done 60516 bp
+Done scaffold_32
+Process scaffold_33
+Done 60192 bp
+Done scaffold_33
+Process scaffold_34
+Done 59170 bp
+Done scaffold_34
+Process scaffold_35
+Done 57841 bp
+Done scaffold_35
+Process scaffold_36
+Done 57599 bp
+Done scaffold_36
+Process scaffold_37
+Done 56567 bp
+Done scaffold_37
+Process scaffold_38
+Done 55996 bp
+Done scaffold_38
+Process scaffold_39
+Done 55437 bp
+Done scaffold_39
+Process scaffold_40
+Done 53554 bp
+Done scaffold_40
+Process scaffold_41
+Done 53202 bp
+Done scaffold_41
+Process scaffold_42
+Done 52958 bp
+Done scaffold_42
+Process scaffold_43
+Done 52539 bp
+Done scaffold_43
+Process scaffold_44
+Done 51280 bp
+Done scaffold_44
+Process scaffold_45
+Done 49393 bp
+Done scaffold_45
+Process scaffold_46
+Done 48636 bp
+Done scaffold_46
+Process scaffold_47
+Done 47781 bp
+Done scaffold_47
+Process scaffold_48
+Done 47414 bp
+Done scaffold_48
+Process scaffold_49
+Done 46312 bp
+Done scaffold_49
+Process scaffold_50
+Done 45228 bp
+Done scaffold_50
+Process scaffold_51
+Done 45006 bp
+Done scaffold_51
+Process scaffold_52
+Done 43923 bp
+Done scaffold_52
+Process scaffold_53
+Done 43533 bp
+Done scaffold_53
+Process scaffold_54
+Done 42150 bp
+Done scaffold_54
+Process scaffold_55
+Done 41919 bp
+Done scaffold_55
+Process scaffold_56
+Done 41854 bp
+Done scaffold_56
+Process scaffold_57
+Done 41823 bp
+Done scaffold_57
+Process scaffold_58
+Done 41638 bp
+Done scaffold_58
+Process scaffold_59
+Done 41569 bp
+Done scaffold_59
+Process scaffold_60
+Done 41301 bp
+Done scaffold_60
+Process scaffold_61
+Done 40949 bp
+Done scaffold_61
+Process scaffold_62
+Done 40162 bp
+Done scaffold_62
+Process scaffold_63
+Done 40143 bp
+Done scaffold_63
+Process scaffold_64
+Done 38673 bp
+Done scaffold_64
+Process scaffold_65
+Done 38411 bp
+Done scaffold_65
+Process scaffold_66
+Done 38235 bp
+Done scaffold_66
+Process scaffold_67
+Done 37923 bp
+Done scaffold_67
+Process scaffold_68
+Done 37769 bp
+Done scaffold_68
+Process scaffold_69
+Done 37495 bp
+Done scaffold_69
+Process scaffold_70
+Done 37190 bp
+Done scaffold_70
+Process scaffold_71
+Done 37106 bp
+Done scaffold_71
+Process scaffold_72
+Done 37084 bp
+Done scaffold_72
+Process scaffold_73
+Done 36970 bp
+Done scaffold_73
+Process scaffold_74
+Done 36605 bp
+Done scaffold_74
+Process scaffold_75
+Done 36594 bp
+Done scaffold_75
+Process scaffold_76
+Done 36166 bp
+Done scaffold_76
+Process scaffold_77
+Done 36022 bp
+Done scaffold_77
+Process scaffold_78
+Done 36019 bp
+Done scaffold_78
+Process scaffold_79
+Done 35974 bp
+Done scaffold_79
+Process scaffold_80
+Done 35543 bp
+Done scaffold_80
+Process scaffold_81
+Done 35355 bp
+Done scaffold_81
+Process scaffold_82
+Done 35218 bp
+Done scaffold_82
+Process scaffold_83
+Done 35048 bp
+Done scaffold_83
+Process scaffold_84
+Done 34984 bp
+Done scaffold_84
+Process scaffold_85
+Done 34622 bp
+Done scaffold_85
+Process scaffold_86
+Done 34569 bp
+Done scaffold_86
+Process scaffold_87
+Done 34568 bp
+Done scaffold_87
+Process scaffold_88
+Done 34545 bp
+Done scaffold_88
+Process scaffold_89
+Done 34160 bp
+Done scaffold_89
+Process scaffold_90
+Done 34057 bp
+Done scaffold_90
+Process scaffold_91
+Done 33854 bp
+Done scaffold_91
+Process scaffold_92
+Done 33674 bp
+Done scaffold_92
+Process scaffold_93
+Done 33135 bp
+Done scaffold_93
+Process scaffold_94
+Done 32901 bp
+Done scaffold_94
+Process scaffold_95
+Done 31912 bp
+Done scaffold_95
+Process scaffold_96
+Done 31751 bp
+Done scaffold_96
+Process scaffold_97
+Done 31415 bp
+Done scaffold_97
+Process scaffold_98
+Done 31352 bp
+Done scaffold_98
+Process scaffold_99
+Done 31323 bp
+Done scaffold_99
+Process scaffold_100
+Done 31297 bp
+Done scaffold_100
+Process scaffold_101
+Done 30979 bp
+Done scaffold_101
+Process scaffold_102
+Done 30893 bp
+Done scaffold_102
+Process scaffold_103
+Done 30759 bp
+Done scaffold_103
+Process scaffold_104
+Done 30740 bp
+Done scaffold_104
+Process scaffold_105
+Done 30493 bp
+Done scaffold_105
+Process scaffold_106
+Done 30423 bp
+Done scaffold_106
+Process scaffold_107
+Done 30101 bp
+Done scaffold_107
+Process scaffold_108
+Done 29938 bp
+Done scaffold_108
+Process scaffold_109
+Done 29671 bp
+Done scaffold_109
+Process scaffold_110
+Done 29552 bp
+Done scaffold_110
+Process scaffold_111
+Done 29504 bp
+Done scaffold_111
+Process scaffold_112
+Done 29465 bp
+Done scaffold_112
+Process scaffold_113
+Done 29131 bp
+Done scaffold_113
+Process scaffold_114
+Done 28872 bp
+Done scaffold_114
+Process scaffold_115
+Done 28386 bp
+Done scaffold_115
+Process scaffold_116
+Done 28304 bp
+Done scaffold_116
+Process scaffold_117
+Done 27413 bp
+Done scaffold_117
+Process scaffold_118
+Done 27053 bp
+Done scaffold_118
+Process scaffold_119
+Done 26528 bp
+Done scaffold_119
+Process scaffold_120
+Done 26101 bp
+Done scaffold_120
+Process scaffold_121
+Done 26016 bp
+Done scaffold_121
+Process scaffold_122
+Done 25821 bp
+Done scaffold_122
+Process scaffold_123
+Done 25527 bp
+Done scaffold_123
+Process scaffold_124
+Done 25500 bp
+Done scaffold_124
+Process scaffold_125
+Done 25451 bp
+Done scaffold_125
+Process scaffold_126
+Done 25378 bp
+Done scaffold_126
+Process scaffold_127
+Done 25332 bp
+Done scaffold_127
+Process scaffold_128
+Done 25272 bp
+Done scaffold_128
+Process scaffold_129
+Done 24894 bp
+Done scaffold_129
+Process scaffold_130
+Done 24342 bp
+Done scaffold_130
+Process scaffold_131
+Done 24292 bp
+Done scaffold_131
+Process scaffold_132
+Done 24096 bp
+Done scaffold_132
+Process scaffold_133
+Done 23945 bp
+Done scaffold_133
+Process scaffold_134
+Done 23936 bp
+Done scaffold_134
+Process scaffold_135
+Done 23831 bp
+Done scaffold_135
+Process scaffold_136
+Done 23165 bp
+Done scaffold_136
+Process scaffold_137
+Done 23075 bp
+Done scaffold_137
+Process scaffold_138
+Done 22769 bp
+Done scaffold_138
+Process scaffold_139
+Done 22014 bp
+Done scaffold_139
+Process scaffold_140
+Done 21756 bp
+Done scaffold_140
+Process scaffold_141
+Done 21492 bp
+Done scaffold_141
+Process scaffold_142
+Done 21143 bp
+Done scaffold_142
+Process scaffold_143
+Done 20915 bp
+Done scaffold_143
+Process scaffold_144
+Done 20851 bp
+Done scaffold_144
+Process scaffold_145
+Done 20544 bp
+Done scaffold_145
+Process scaffold_146
+Done 20080 bp
+Done scaffold_146
+Process scaffold_147
+Done 19948 bp
+Done scaffold_147
+Process scaffold_148
+Done 19815 bp
+Done scaffold_148
+Process scaffold_149
+Done 19715 bp
+Done scaffold_149
+Process scaffold_150
+Done 19590 bp
+Done scaffold_150
+Process scaffold_151
+Done 19091 bp
+Done scaffold_151
+Process scaffold_152
+Done 18835 bp
+Done scaffold_152
+Process scaffold_153
+Done 18729 bp
+Done scaffold_153
+Process scaffold_154
+Done 18370 bp
+Done scaffold_154
+Process scaffold_155
+Done 18354 bp
+Done scaffold_155
+Process scaffold_156
+Done 18211 bp
+Done scaffold_156
+Process scaffold_157
+Done 18080 bp
+Done scaffold_157
+Process scaffold_158
+Done 18051 bp
+Done scaffold_158
+Process scaffold_159
+Done 17723 bp
+Done scaffold_159
+Process scaffold_160
+Done 17614 bp
+Done scaffold_160
+Process scaffold_161
+Done 17597 bp
+Done scaffold_161
+Process scaffold_162
+Done 17451 bp
+Done scaffold_162
+Process scaffold_163
+Done 17394 bp
+Done scaffold_163
+Process scaffold_164
+Done 17252 bp
+Done scaffold_164
+Process scaffold_165
+Done 16922 bp
+Done scaffold_165
+Process scaffold_166
+Done 16846 bp
+Done scaffold_166
+Process scaffold_167
+Done 16445 bp
+Done scaffold_167
+Process scaffold_168
+Done 16119 bp
+Done scaffold_168
+Process scaffold_169
+Done 15726 bp
+Done scaffold_169
+Process scaffold_170
+Done 15611 bp
+Done scaffold_170
+Process scaffold_171
+Done 15590 bp
+Done scaffold_171
+Process scaffold_172
+Done 15473 bp
+Done scaffold_172
+Process scaffold_173
+Done 15322 bp
+Done scaffold_173
+Process scaffold_174
+Done 15305 bp
+Done scaffold_174
+Process scaffold_175
+Done 15147 bp
+Done scaffold_175
+Process scaffold_176
+Done 15087 bp
+Done scaffold_176
+Process scaffold_177
+Done 15067 bp
+Done scaffold_177
+Process scaffold_178
+Done 14671 bp
+Done scaffold_178
+Process scaffold_179
+Done 14575 bp
+Done scaffold_179
+Process scaffold_180
+Done 14434 bp
+Done scaffold_180
+Process scaffold_181
+Done 14358 bp
+Done scaffold_181
+Process scaffold_182
+Done 14319 bp
+Done scaffold_182
+Process scaffold_183
+Done 14106 bp
+Done scaffold_183
+Process scaffold_184
+Done 13992 bp
+Done scaffold_184
+Process scaffold_185
+Done 13719 bp
+Done scaffold_185
+Process scaffold_186
+Done 13691 bp
+Done scaffold_186
+Process scaffold_187
+Done 13680 bp
+Done scaffold_187
+Process scaffold_188
+Done 13611 bp
+Done scaffold_188
+Process scaffold_189
+Done 13573 bp
+Done scaffold_189
+Process scaffold_190
+Done 13494 bp
+Done scaffold_190
+Process scaffold_191
+Done 13485 bp
+Done scaffold_191
+Process scaffold_192
+Done 13206 bp
+Done scaffold_192
+Process scaffold_193
+Done 13113 bp
+Done scaffold_193
+Process scaffold_194
+Done 13050 bp
+Done scaffold_194
+Process scaffold_195
+Done 12927 bp
+Done scaffold_195
+Process scaffold_196
+Done 12925 bp
+Done scaffold_196
+Process scaffold_197
+Done 12670 bp
+Done scaffold_197
+Process scaffold_198
+Done 12480 bp
+Done scaffold_198
+Process scaffold_199
+Done 12386 bp
+Done scaffold_199
+Process scaffold_200
+Done 12355 bp
+Done scaffold_200
+Process scaffold_201
+Done 12348 bp
+Done scaffold_201
+Process scaffold_202
+Done 12299 bp
+Done scaffold_202
+Process scaffold_203
+Done 12292 bp
+Done scaffold_203
+Process scaffold_204
+Done 12147 bp
+Done scaffold_204
+Process scaffold_205
+Done 12068 bp
+Done scaffold_205
+Process scaffold_206
+Done 12005 bp
+Done scaffold_206
+Process scaffold_207
+Done 11971 bp
+Done scaffold_207
+Process scaffold_208
+Done 11950 bp
+Done scaffold_208
+Process scaffold_209
+Done 11555 bp
+Done scaffold_209
+Process scaffold_210
+Done 11505 bp
+Done scaffold_210
+Process scaffold_211
+Done 11298 bp
+Done scaffold_211
+Process scaffold_212
+Done 11155 bp
+Done scaffold_212
+Process scaffold_213
+Done 11142 bp
+Done scaffold_213
+Process scaffold_214
+Done 11076 bp
+Done scaffold_214
+Process scaffold_215
+Done 10929 bp
+Done scaffold_215
+Process scaffold_216
+Done 10864 bp
+Done scaffold_216
+Process scaffold_217
+Done 10799 bp
+Done scaffold_217
+Process scaffold_218
+Done 10650 bp
+Done scaffold_218
+Process scaffold_219
+Done 10634 bp
+Done scaffold_219
+Process scaffold_220
+Done 10027 bp
+Done scaffold_220
+Process scaffold_221
+Done 9808 bp
+Done scaffold_221
+Process scaffold_222
+Done 9804 bp
+Done scaffold_222
+Process scaffold_223
+Done 9744 bp
+Done scaffold_223
+Process scaffold_224
+Done 9703 bp
+Done scaffold_224
+Process scaffold_225
+Done 9668 bp
+Done scaffold_225
+Process scaffold_226
+Done 9558 bp
+Done scaffold_226
+Process scaffold_227
+Done 9468 bp
+Done scaffold_227
+Process scaffold_228
+Done 9288 bp
+Done scaffold_228
+Process scaffold_229
+Done 9144 bp
+Done scaffold_229
+Process scaffold_230
+Done 9057 bp
+Done scaffold_230
+Process scaffold_231
+Done 9007 bp
+Done scaffold_231
+Process scaffold_232
+Done 8966 bp
+Done scaffold_232
+Process scaffold_233
+Done 8860 bp
+Done scaffold_233
+Process scaffold_234
+Done 8804 bp
+Done scaffold_234
+Process scaffold_235
+Done 8789 bp
+Done scaffold_235
+Process scaffold_236
+Done 8695 bp
+Done scaffold_236
+Process scaffold_237
+Done 8547 bp
+Done scaffold_237
+Process scaffold_238
+Done 8311 bp
+Done scaffold_238
+Process scaffold_239
+Done 8264 bp
+Done scaffold_239
+Process scaffold_240
+Done 8056 bp
+Done scaffold_240
+Process scaffold_241
+Done 7964 bp
+Done scaffold_241
+Process scaffold_242
+Done 7935 bp
+Done scaffold_242
+Process scaffold_243
+Done 7840 bp
+Done scaffold_243
+Process scaffold_244
+Done 7821 bp
+Done scaffold_244
+Process scaffold_245
+Done 7812 bp
+Done scaffold_245
+Process scaffold_246
+Done 7702 bp
+Done scaffold_246
+Process scaffold_247
+Done 7640 bp
+Done scaffold_247
+Process scaffold_248
+Done 7481 bp
+Done scaffold_248
+Process scaffold_249
+Done 7366 bp
+Done scaffold_249
+Process scaffold_250
+Done 7366 bp
+Done scaffold_250
+Process scaffold_251
+Done 7293 bp
+Done scaffold_251
+Process scaffold_252
+Done 7249 bp
+Done scaffold_252
+Process scaffold_253
+Done 7228 bp
+Done scaffold_253
+Process scaffold_254
+Done 7187 bp
+Done scaffold_254
+Process scaffold_255
+Done 7137 bp
+Done scaffold_255
+Process scaffold_256
+Done 7104 bp
+Done scaffold_256
+Process scaffold_257
+Done 7104 bp
+Done scaffold_257
+Process scaffold_258
+Done 7097 bp
+Done scaffold_258
+Process scaffold_259
+Done 7060 bp
+Done scaffold_259
+Process scaffold_260
+Done 7026 bp
+Done scaffold_260
+Process scaffold_261
+Done 7023 bp
+Done scaffold_261
+Process scaffold_262
+Done 6935 bp
+Done scaffold_262
+Process scaffold_263
+Done 6819 bp
+Done scaffold_263
+Process scaffold_264
+Done 6761 bp
+Done scaffold_264
+Process scaffold_265
+Done 6736 bp
+Done scaffold_265
+Process scaffold_266
+Done 6704 bp
+Done scaffold_266
+Process scaffold_267
+Done 6615 bp
+Done scaffold_267
+Process scaffold_268
+Done 6574 bp
+Done scaffold_268
+Process scaffold_269
+Done 6421 bp
+Done scaffold_269
+Process scaffold_270
+Done 6376 bp
+Done scaffold_270
+Process scaffold_271
+Done 6219 bp
+Done scaffold_271
+Process scaffold_272
+Done 6166 bp
+Done scaffold_272
+Process scaffold_273
+Done 6065 bp
+Done scaffold_273
+Process scaffold_274
+Done 5969 bp
+Done scaffold_274
+Process scaffold_275
+Done 5940 bp
+Done scaffold_275
+Process scaffold_276
+Done 5892 bp
+Done scaffold_276
+Process scaffold_277
+Done 5852 bp
+Done scaffold_277
+Process scaffold_278
+Done 5835 bp
+Done scaffold_278
+Process scaffold_279
+Done 5723 bp
+Done scaffold_279
+Process scaffold_280
+Done 5716 bp
+Done scaffold_280
+Process scaffold_281
+Done 5702 bp
+Done scaffold_281
+Process scaffold_282
+Done 5627 bp
+Done scaffold_282
+Process scaffold_283
+Done 5569 bp
+Done scaffold_283
+Process scaffold_284
+Done 5560 bp
+Done scaffold_284
+Process scaffold_285
+Done 5552 bp
+Done scaffold_285
+Process scaffold_286
+Done 5550 bp
+Done scaffold_286
+Process scaffold_287
+Done 5499 bp
+Done scaffold_287
+Process scaffold_288
+Done 5314 bp
+Done scaffold_288
+Process scaffold_289
+Done 5283 bp
+Done scaffold_289
+Process scaffold_290
+Done 5209 bp
+Done scaffold_290
+Process scaffold_291
+Done 5179 bp
+Done scaffold_291
+Process scaffold_292
+Done 5157 bp
+Done scaffold_292
+Process scaffold_293
+Done 5145 bp
+Done scaffold_293
+Process scaffold_294
+Done 5128 bp
+Done scaffold_294
+Process scaffold_295
+Done 5109 bp
+Done scaffold_295
+Process scaffold_296
+Done 5105 bp
+Done scaffold_296
+Process scaffold_297
+Done 5078 bp
+Done scaffold_297
+Process scaffold_298
+Done 5038 bp
+Done scaffold_298
+Process scaffold_299
+Done 5005 bp
+Done scaffold_299
+Process scaffold_300
+Done 4958 bp
+Done scaffold_300
+Process scaffold_301
+Done 4904 bp
+Done scaffold_301
+Process scaffold_302
+Done 4878 bp
+Done scaffold_302
+Process scaffold_303
+Done 4758 bp
+Done scaffold_303
+Process scaffold_304
+Done 4717 bp
+Done scaffold_304
+Process scaffold_305
+Done 4708 bp
+Done scaffold_305
+Process scaffold_306
+Done 4631 bp
+Done scaffold_306
+Process scaffold_307
+Done 4623 bp
+Done scaffold_307
+Process scaffold_308
+Done 4554 bp
+Done scaffold_308
+Process scaffold_309
+Done 4440 bp
+Done scaffold_309
+Process scaffold_310
+Done 4435 bp
+Done scaffold_310
+Process scaffold_311
+Done 4435 bp
+Done scaffold_311
+Process scaffold_312
+Done 4388 bp
+Done scaffold_312
+Process scaffold_313
+Done 4381 bp
+Done scaffold_313
+Process scaffold_314
+Done 4285 bp
+Done scaffold_314
+Process scaffold_315
+Done 4232 bp
+Done scaffold_315
+Process scaffold_316
+Done 4208 bp
+Done scaffold_316
+Process scaffold_317
+Done 4177 bp
+Done scaffold_317
+Process scaffold_318
+Done 3950 bp
+Done scaffold_318
+Process scaffold_319
+Done 3945 bp
+Done scaffold_319
+Process scaffold_320
+Done 3850 bp
+Done scaffold_320
+Process scaffold_321
+Done 3759 bp
+Done scaffold_321
+Process scaffold_322
+Done 3754 bp
+Done scaffold_322
+Process scaffold_323
+Done 3509 bp
+Done scaffold_323
+Process scaffold_324
+Done 3499 bp
+Done scaffold_324
+Process scaffold_325
+Done 3359 bp
+Done scaffold_325
+Process scaffold_326
+Done 3347 bp
+Done scaffold_326
+Process scaffold_327
+Done 3248 bp
+Done scaffold_327
+Process scaffold_328
+Done 3136 bp
+Done scaffold_328
+Process scaffold_329
+Done 3112 bp
+Done scaffold_329
+Process scaffold_330
+Done 3079 bp
+Done scaffold_330
+Process scaffold_331
+Done 3073 bp
+Done scaffold_331
+Process scaffold_332
+Done 3049 bp
+Done scaffold_332
+Process scaffold_333
+Done 3045 bp
+Done scaffold_333
+Process scaffold_334
+Done 3015 bp
+Done scaffold_334
+Process scaffold_335
+Done 2986 bp
+Done scaffold_335
+Process scaffold_336
+Done 2960 bp
+Done scaffold_336
+Process scaffold_337
+Done 2950 bp
+Done scaffold_337
+Process scaffold_338
+Done 2922 bp
+Done scaffold_338
+Process scaffold_339
+Done 2895 bp
+Done scaffold_339
+Process scaffold_340
+Done 2890 bp
+Done scaffold_340
+Process scaffold_341
+Done 2886 bp
+Done scaffold_341
+Process scaffold_342
+Done 2840 bp
+Done scaffold_342
+Process scaffold_343
+Done 2827 bp
+Done scaffold_343
+Process scaffold_344
+Done 2799 bp
+Done scaffold_344
+Process scaffold_345
+Done 2784 bp
+Done scaffold_345
+Process scaffold_346
+Done 2769 bp
+Done scaffold_346
+Process scaffold_347
+Done 2759 bp
+Done scaffold_347
+Process scaffold_348
+Done 2757 bp
+Done scaffold_348
+Process scaffold_349
+Done 2754 bp
+Done scaffold_349
+Process scaffold_350
+Done 2735 bp
+Done scaffold_350
+Process scaffold_351
+Done 2732 bp
+Done scaffold_351
+Process scaffold_352
+Done 2730 bp
+Done scaffold_352
+Process scaffold_353
+Done 2709 bp
+Done scaffold_353
+Process scaffold_354
+Done 2709 bp
+Done scaffold_354
+Process scaffold_355
+Done 2707 bp
+Done scaffold_355
+Process scaffold_356
+Done 2700 bp
+Done scaffold_356
+Process scaffold_357
+Done 2686 bp
+Done scaffold_357
+Process scaffold_358
+Done 2681 bp
+Done scaffold_358
+Process scaffold_359
+Done 2679 bp
+Done scaffold_359
+Process scaffold_360
+Done 2654 bp
+Done scaffold_360
+Process scaffold_361
+Done 2647 bp
+Done scaffold_361
+Process scaffold_362
+Done 2637 bp
+Done scaffold_362
+Process scaffold_363
+Done 2636 bp
+Done scaffold_363
+Process scaffold_364
+Done 2616 bp
+Done scaffold_364
+Process scaffold_365
+Done 2609 bp
+Done scaffold_365
+Process scaffold_366
+Done 2605 bp
+Done scaffold_366
+Process scaffold_367
+Done 2601 bp
+Done scaffold_367
+Process scaffold_368
+Done 2601 bp
+Done scaffold_368
+Process scaffold_369
+Done 2584 bp
+Done scaffold_369
+Process scaffold_370
+Done 2577 bp
+Done scaffold_370
+Process scaffold_371
+Done 2576 bp
+Done scaffold_371
+Process scaffold_372
+Done 2553 bp
+Done scaffold_372
+Process scaffold_373
+Done 2528 bp
+Done scaffold_373
+Process scaffold_374
+Done 2514 bp
+Done scaffold_374
+Process scaffold_375
+Done 2513 bp
+Done scaffold_375
+Process scaffold_376
+Done 2493 bp
+Done scaffold_376
+Process scaffold_377
+Done 2493 bp
+Done scaffold_377
+Process scaffold_378
+Done 2491 bp
+Done scaffold_378
+Process scaffold_379
+Done 2491 bp
+Done scaffold_379
+Process scaffold_380
+Done 2490 bp
+Done scaffold_380
+Process scaffold_381
+Done 2474 bp
+Done scaffold_381
+Process scaffold_382
+Done 2463 bp
+Done scaffold_382
+Process scaffold_383
+Done 2437 bp
+Done scaffold_383
+Process scaffold_384
+Done 2427 bp
+Done scaffold_384
+Process scaffold_385
+Done 2425 bp
+Done scaffold_385
+Process scaffold_386
+Done 2392 bp
+Done scaffold_386
+Process scaffold_387
+Done 2377 bp
+Done scaffold_387
+Process scaffold_388
+Done 2339 bp
+Done scaffold_388
+Process scaffold_389
+Done 2336 bp
+Done scaffold_389
+Process scaffold_390
+Done 2335 bp
+Done scaffold_390
+Process scaffold_391
+Done 2316 bp
+Done scaffold_391
+Process scaffold_392
+Done 2293 bp
+Done scaffold_392
+Process scaffold_393
+Done 2284 bp
+Done scaffold_393
+Process scaffold_394
+Done 2270 bp
+Done scaffold_394
+Process scaffold_395
+Done 2260 bp
+Done scaffold_395
+Process scaffold_396
+Done 2258 bp
+Done scaffold_396
+Process scaffold_397
+Done 2234 bp
+Done scaffold_397
+Process scaffold_398
+Done 2223 bp
+Done scaffold_398
+Process scaffold_399
+Done 2213 bp
+Done scaffold_399
+Process scaffold_400
+Done 2118 bp
+Done scaffold_400
+Process scaffold_401
+Done 2089 bp
+Done scaffold_401
+Process scaffold_402
+Done 1953 bp
+Done scaffold_402
+Process scaffold_403
+Done 1935 bp
+Done scaffold_403
+Process scaffold_404
+Done 1810 bp
+Done scaffold_404
+Process scaffold_405
+Done 1563 bp
+Done scaffold_405
+Process scaffold_406
+Done 1208 bp
+Done scaffold_406
+Process scaffold_407
+Done 1041 bp
+Done scaffold_407
+Process scaffold_408
+Done 881 bp
+Done scaffold_408
+Process scaffold_409
+Done 810 bp
+Done scaffold_409
+Process scaffold_410
+Done 572 bp
+Done scaffold_410
+
+[11/13/26 04:39:04]: 3,445 predictions from GlimmerHMM
+[11/13/26 04:39:05]: Prediction sources: ['Augustus', 'HiQ', 'GlimmerHMM', 'snap']
+[11/13/26 04:39:05]: Summary of gene models: {'total': 9530, 'Augustus': 3046, 'HiQ': 41, 'GlimmerHMM': 3445, 'snap': 2998}
+[11/13/26 04:39:05]: EVM Weights: {'Augustus': 1, 'HiQ': 2, 'GlimmerHMM': 1, 'snap': 1, 'proteins': 1}
+[11/13/26 04:39:05]: Summary of gene models passed to EVM (weights):
+[11/13/26 04:39:05]: Launching EVM via funannotate-runEVM.py
+[11/13/26 04:39:05]: /venv/bin/python /venv/lib/python3.8/site-packages/funannotate/aux_scripts/funannotate-runEVM.py -w /data/outputs/funannotate_out/HU_prediction/predict_misc/weights.evm.txt -c 8 -g /data/outputs/funannotate_out/HU_prediction/predict_misc/gene_predictions.gff3 -d /data/outputs/funannotate_out/HU_prediction/predict_misc/EVM -f /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa -l outputs/funannotate_out/HU_prediction/logfiles/funannotate-EVM.log -m 10 -i 1500 -o /data/outputs/funannotate_out/HU_prediction/predict_misc/evm.round1.gff3 --EVM_HOME /venv/opt/evidencemodeler-1.1.1 -p /data/outputs/funannotate_out/HU_prediction/predict_misc/protein_alignments.gff3
+[11/13/26 04:41:23]: 3,327 total gene models from EVM
+[11/13/26 04:41:23]: Generating protein fasta files from 3,327 EVM models
+[11/13/26 04:41:24]: now filtering out bad gene models (< 50 aa in length, transposable elements, etc).
+[11/13/26 04:41:24]: diamond blastp --sensitive --query outputs/funannotate_out/HU_prediction/predict_misc/evm.round1.proteins.fa --threads 8 --out outputs/funannotate_out/HU_prediction/predict_misc/repeats.xml --db /data/funannotate_db/repeats.dmnd --evalue 1e-10 --max-target-seqs 1 --outfmt 5
+[11/13/26 04:41:27]: bedtools intersect -sorted -f 0.9 -a /data/outputs/funannotate_out/HU_prediction/predict_misc/evm.round1.gff3.sorted.gff -b /data/outputs/funannotate_out/HU_prediction/predict_misc/repeatmasker.bed.sorted.bed
+[11/13/26 04:41:27]: Found 10 gene models to remove: 0 too short; 0 span gaps; 10 transposable elements
+[11/13/26 04:41:27]: 3,317 gene models remaining
+[11/13/26 04:41:27]: Predicting tRNAs
+[11/13/26 04:41:27]: tRNAscan-SE -o outputs/funannotate_out/HU_prediction/predict_misc/tRNAscan.out --thread 8 /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa
+[11/13/26 04:43:15]: Status: Phase I: Searching for tRNAs with HMM-enabled Infernal
+Status: Phase II: Infernal verification of candidate tRNAs detected with first-pass scan
+
+[11/13/26 04:43:15]: 
+tRNAscan-SE v.2.0.9 (July 2021) - scan sequences for transfer RNAs
+Copyright (C) 2020 Patricia Chan and Todd Lowe
+                   University of California Santa Cruz
+Freely distributed under the GNU General Public License (GPLv3)
+
+------------------------------------------------------------
+Sequence file(s) to search:        /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa
+Search Mode:                       Eukaryotic
+Results written to:                outputs/funannotate_out/HU_prediction/predict_misc/tRNAscan.out
+Output format:                     Tabular
+Searching with:                    Infernal First Pass->Infernal
+Isotype-specific model scan:       Yes
+Covariance model:                  /venv/lib/tRNAscan-SE/models/TRNAinf-euk.cm
+                                   /venv/lib/tRNAscan-SE/models/TRNAinf-euk-SeC.cm
+Infernal first pass cutoff score:  10
+
+Temporary directory:               /tmp
+------------------------------------------------------------
+
+
+[11/13/26 04:43:15]: bedtools intersect -sorted -v -a /data/outputs/funannotate_out/HU_prediction/predict_misc/trnascan.gff3.sorted.gff3 -b /data/outputs/funannotate_out/HU_prediction/predict_misc/evm.cleaned.gff3.sorted.gff3 /data/outputs/funannotate_out/HU_prediction/predict_misc/assembly-gaps.bed.sorted.gff3
+[11/13/26 04:43:15]: 103 tRNAscan models are valid (non-overlapping)
+[11/13/26 04:43:15]: Generating GenBank tbl annotation file
+[11/13/26 04:43:19]: Collecting final annotation files for 3,420 total gene models
+[11/13/26 04:43:19]: Converting to final Genbank format
+[11/13/26 04:43:19]: /venv/bin/python /venv/lib/python3.8/site-packages/funannotate/aux_scripts/tbl2asn_parallel.py -i outputs/funannotate_out/HU_prediction/predict_misc/tbl2asn/genome.tbl -f /data/outputs/funannotate_out/HU_prediction/predict_misc/genome.softmasked.fa -o outputs/funannotate_out/HU_prediction/predict_misc/tbl2asn --sbt /venv/lib/python3.8/site-packages/funannotate/config/test.sbt -d outputs/funannotate_out/HU_prediction/predict_results/Hanseniaspora_uvarum_AD.discrepency.report.txt -s Hanseniaspora uvarum -t -l paired-ends -v 1 -c 8 --strain AD
+[11/13/26 04:43:26]: Funannotate predict is finished, output files are in the outputs/funannotate_out/HU_prediction/predict_results folder
+[11/13/26 04:43:26]: Your next step might be functional annotation, suggested commands:
+-------------------------------------------------------
+Run InterProScan (manual install): 
+funannotate iprscan -i outputs/funannotate_out/HU_prediction -c 8
+
+Run antiSMASH (optional): 
+funannotate remote -i outputs/funannotate_out/HU_prediction -m antismash -e youremail@server.edu
+
+Annotate Genome: 
+funannotate annotate -i outputs/funannotate_out/HU_prediction --cpus 8 --sbt yourSBTfile.txt
+-------------------------------------------------------
+                
+[11/13/26 04:43:26]: Training parameters file saved: outputs/funannotate_out/HU_prediction/predict_results/hanseniaspora_uvarum_ad.parameters.json
+[11/13/26 04:43:26]: Add species parameters to database:
+
+  funannotate species -s hanseniaspora_uvarum_ad -a outputs/funannotate_out/HU_prediction/predict_results/hanseniaspora_uvarum_ad.parameters.json
+

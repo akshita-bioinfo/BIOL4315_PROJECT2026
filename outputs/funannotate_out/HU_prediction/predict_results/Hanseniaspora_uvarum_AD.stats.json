@@ -1,0 +1,58 @@
+{
+    "format": "annotation",
+    "command": "/venv/bin/funannotate predict -i outputs/funannotate/HU/assembly_masked.fasta -o outputs/funannotate_out/HU_prediction -s Hanseniaspora uvarum --strain AD --busco_db saccharomycetes --cpus 8",
+    "organism": "Hanseniaspora_uvarum_AD",
+    "software": {
+        "name": "funannotate",
+        "version": "1.8.15",
+        "date": "2026-11-13",
+        "resources": {}
+    },
+    "assembly": {
+        "num_contigs": 410,
+        "length": 8974683,
+        "mean_length": 21889.47,
+        "N50": 40143,
+        "L50": 63,
+        "N90": 10634,
+        "L90": 219,
+        "GC_content": 33.0
+    },
+    "annotation": {
+        "genes": 3420,
+        "common_name": 0,
+        "mRNA": 3317,
+        "tRNA": 103,
+        "ncRNA": 0,
+        "rRNA": 0,
+        "avg_gene_length": 1671.93,
+        "transcript-level": {
+            "CDS_transcripts": 3317,
+            "CDS_five_utr": 0,
+            "CDS_three_utr": 0,
+            "CDS_no_utr": 3317,
+            "CDS_five_three_utr": 0,
+            "CDS_complete": 3080,
+            "CDS_no-start": 88,
+            "CDS_no-stop": 146,
+            "CDS_no-start_no-stop": 3,
+            "total_exons": 4949,
+            "total_cds_exons": 4949,
+            "multiple_exon_transcript": 923,
+            "single_exon_transcript": 2394,
+            "avg_exon_length": 627.28,
+            "avg_protein_length": 502.99,
+            "functional": {
+                "go_terms": 0,
+                "interproscan": 0,
+                "eggnog": 0,
+                "pfam": 0,
+                "cazyme": 0,
+                "merops": 0,
+                "busco": 0,
+                "secretion": 0
+            },
+            "pct_exon_overlap_protein_evidence": 2.55
+        }
+    }
+}

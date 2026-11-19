@@ -243,12 +243,12 @@ Activate your Conda environment and run emapper.py on your *.proteins.fa file
 eval "$(conda shell.bash hook)"
 conda activate eggnog_env
 
-EGGNOG_DB_PATH="/path/to/eggnog_data"
+EGGNOG_DB_PATH="$HOME/Desktop/eggnog_db"
 
 emapper.py \
-  -i funannotate_out/predict_results/*.proteins.fa \
-  --output isolate_functional \
-  --output_dir funannotate_out \
+ -i outputs/funannotate_out/WA_prediction/predict_results/Wickerhamomyces_anomalus_NK1.proteins.fa \
+  --output WA_functional \
+  --output_dir outputs/egg_out/WA \
   --data_dir $EGGNOG_DB_PATH \
   --decorate_gff yes \
   --excel \
@@ -256,7 +256,23 @@ emapper.py \
   --cpu 8
 ```
 
+```{bash}
+eval "$(conda shell.bash hook)"
+conda activate eggnog_env
 
+EGGNOG_DB_PATH="$HOME/Desktop/eggnog_db"
+
+emapper.py \
+ -i outputs/funannotate_out/HU_prediction/predict_results/Hanseniaspora_uvarum_AD.proteins.fa \
+  --output HU_functional \
+  --output_dir outputs/egg_out/HU \
+  --data_dir $EGGNOG_DB_PATH \
+  --decorate_gff yes \
+  --excel \
+  -m diamond \
+  --cpu 8
+```
+  
 ## Interpreting funannotate results
 ### Using ggplot2
 ```{r}

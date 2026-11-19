@@ -1,0 +1,58 @@
+{
+    "format": "annotation",
+    "command": "/venv/bin/funannotate predict -i outputs/funannotate/WA/assembly_masked.fasta -o outputs/funannotate_out/WA_prediction_corrected -s Wickerhamomyces anomalus --strain NK1 --busco_db saccharomycetes --cpus 8",
+    "organism": "Wickerhamomyces_anomalus_NK1",
+    "software": {
+        "name": "funannotate",
+        "version": "1.8.15",
+        "date": "2026-11-18",
+        "resources": {}
+    },
+    "assembly": {
+        "num_contigs": 833,
+        "length": 12993493,
+        "mean_length": 15598.43,
+        "N50": 30759,
+        "L50": 131,
+        "N90": 6909,
+        "L90": 475,
+        "GC_content": 34.47
+    },
+    "annotation": {
+        "genes": 6147,
+        "common_name": 0,
+        "mRNA": 6000,
+        "tRNA": 147,
+        "ncRNA": 0,
+        "rRNA": 0,
+        "avg_gene_length": 1403.53,
+        "transcript-level": {
+            "CDS_transcripts": 6000,
+            "CDS_five_utr": 0,
+            "CDS_three_utr": 0,
+            "CDS_no_utr": 6000,
+            "CDS_five_three_utr": 0,
+            "CDS_complete": 5483,
+            "CDS_no-start": 206,
+            "CDS_no-stop": 302,
+            "CDS_no-start_no-stop": 9,
+            "total_exons": 9221,
+            "total_cds_exons": 9221,
+            "multiple_exon_transcript": 2215,
+            "single_exon_transcript": 3785,
+            "avg_exon_length": 551.94,
+            "avg_protein_length": 448.87,
+            "functional": {
+                "go_terms": 0,
+                "interproscan": 0,
+                "eggnog": 0,
+                "pfam": 0,
+                "cazyme": 0,
+                "merops": 0,
+                "busco": 0,
+                "secretion": 0
+            },
+            "pct_exon_overlap_protein_evidence": 2.88
+        }
+    }
+}
