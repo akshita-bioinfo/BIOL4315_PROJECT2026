@@ -19,6 +19,8 @@ outputs/*
 !outputs/WAsequali_reports/
 !outputs/HUsequali_reports/
 !outputs/sequali_filtered_files/
+!outputs/funannotate_out/
+!outputs/egg_out/
 
 # WA Flye: keep only log
 outputs/assembly/WA_flye_output/*
@@ -79,6 +81,7 @@ outputs/funannotate_out/WA_prediction/logfiles/*
 outputs/funannotate_out/WA_prediction/predict_results/*
 !outputs/funannotate_out/WA_prediction/predict_results/*.gff3
 !outputs/funannotate_out/WA_prediction/predict_results/*.proteins.fa
+!outputs/funannotate_out/WA_prediction/predict_results/*.stats.json
 
 # Funannotate HU - ignore everything by default
 outputs/funannotate_out/HU_prediction/*
@@ -93,3 +96,21 @@ outputs/funannotate_out/HU_prediction/logfiles/*
 outputs/funannotate_out/HU_prediction/predict_results/*
 !outputs/funannotate_out/HU_prediction/predict_results/*.gff3
 !outputs/funannotate_out/HU_prediction/predict_results/*.proteins.fa
+!outputs/funannotate_out/HU_prediction/predict_results/*.stats.json
+
+# Ignore all eggNOG output contents by default
+outputs/egg_out/WA/*
+
+# Keep final annotation files
+!outputs/egg_out/WA/*.emapper.annotations
+!outputs/egg_out/WA/*.emapper.seed_orthologs
+
+# Keep decorated GFF, if generated
+!outputs/egg_out/WA/*.emapper.genepred.gff
+
+# Keep annotation summary CSV files
+!outputs/egg_out/WA/*.csv
+
+
+
+
