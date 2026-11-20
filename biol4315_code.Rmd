@@ -594,7 +594,6 @@ write_csv(
 ```
 
 ### Ester-biosynthesis candidates
-
 ```{r}
 # ============================================================
 # COMPARATIVE ESTER-BIOSYNTHESIS CANDIDATE ANALYSIS
@@ -810,13 +809,6 @@ write_csv(
 
 cat("\nAnalysis completed. Files saved in outputs/.\n")
 ```
-
-### Ehrlich pathways
-```{r}
-
-```
-
-
 ### Using heatmap
 ```{r}
 
