@@ -364,8 +364,9 @@ capture.output(
 )
 ```
 
-### Using ggplot2
+### Using ggplot2 (graph1)
 ```{r}
+
 library(tidyverse)
 library(GO.db)
 library(AnnotationDbi)
@@ -408,146 +409,549 @@ voc_go <- go_annotated %>%
 voc_go_counts <- voc_go %>%
   count(TERM, Isolate)
 
-ggplot(voc_go_counts,
-       aes(x = reorder(TERM, n), y = n, fill = Isolate)) +
+voc_plot <- ggplot(
+  voc_go_counts,
+  aes(x = reorder(TERM, n), y = n, fill = Isolate)
+) +
   geom_col(position = "dodge") +
   coord_flip() +
+  scale_fill_manual(
+    values = c(
+      "WA" = "#2878B5",
+      "HU" = "#269B8A"
+    )
+  ) +
   theme_minimal() +
   labs(
     title = "VOC-Related Biological Processes in WA and HU",
     x = "Biological Process",
     y = "Number of Annotated Genes",
     fill = "Isolate"
-  )
+  ) 
+  
+voc_plot
+
+# save the plot
+ggsave(filename = "outputs/results_figs/WA_HU_VOC_GO.png",
+       plot = voc_plot,
+       width = 12,
+       height = 7,
+       dpi = 300,
+       bg="white")
 ```
+
+### Using ggplot2 (graph2)
+```{r}
+
+library(tidyverse)
+library(ggtext)
+
+# 1. Define the order of functional categories
+category_order <- c(
+  "Sugar breakdown",
+  "Fermentation",
+  "Alcohol production and metabolism",
+  "Aldehyde metabolism",
+  "Aroma compound building blocks",
+  "Amino acid breakdown",
+  "Fat and lipid metabolism"
+)
+
+# 2. Count genes in each GO category for each isolate
+# Rename WA and HU using the full species names
+go_category_counts <- voc_go_grouped %>%
+  mutate(
+    Isolate = case_when(
+      Isolate == "WA" ~ "W. anomalus (NK1)",
+      Isolate == "HU" ~ "H. uvarum (AD)",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Isolate)) %>%
+  count(GO_category, Isolate, name = "n_genes")
+
+# 3. Set category and isolate order
+go_category_counts <- go_category_counts %>%
+  mutate(
+    GO_category = factor(
+      GO_category,
+      levels = category_order
+    ),
+    Isolate = factor(
+      Isolate,
+      levels = c("W. anomalus (NK1)", "H. uvarum (AD)")
+    )
+  )
+
+# 4. Check the count table before plotting
+print(go_category_counts, n = Inf)
+
+# 5. Create the grouped bar graph
+voc_plot <- ggplot(
+  go_category_counts,
+  aes(
+    x = GO_category,
+    y = n_genes,
+    fill = Isolate
+  )
+) +
+  geom_col(
+    position = position_dodge(width = 0.8),
+    width = 0.7
+  ) +
+  geom_text(
+    aes(label = n_genes),
+    position = position_dodge(width = 0.8),
+    vjust = -0.4,
+    size = 3.5
+  ) +
+  scale_fill_manual(
+    values = c(
+      "W. anomalus (NK1)" = "#2878B5",
+      "H. uvarum (AD)" = "#269B8A"
+    ),
+    breaks = c(
+      "W. anomalus (NK1)",
+      "H. uvarum (AD)"
+    ),
+    labels = c(
+      "W. anomalus (NK1)" = "<i>W. anomalus</i> (NK1)",
+      "H. uvarum (AD)" = "<i>H. uvarum</i> (AD)"
+    ),
+    drop = FALSE
+  ) +
+  scale_x_discrete(
+    drop = FALSE,
+    labels = function(x) stringr::str_wrap(x, width = 22)
+  ) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0.15)),
+    breaks = scales::breaks_pretty()
+  ) +
+  labs(
+    title = "Functional Categories Associated with VOC-Related Metabolism",
+    subtitle = "Comparison of biological process annotations between two yeast isolates",
+    x = "Metabolic Functional Category",
+    y = "Number of Annotated Genes",
+    fill = "Yeast Isolates",
+    caption = paste(
+      "Selected GO biological process terms were grouped into broader functional categories.",
+      "Counts represent predicted protein annotations, not gene expression or measured VOC production."
+    )
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(
+      face = "bold",
+      size = 12
+    ),
+    plot.subtitle = element_text(
+      size = 11,
+      color = "grey30"
+    ),
+    plot.caption = element_text(
+      size = 9,
+      color = "grey30",
+      hjust = 0
+    ),
+    axis.text.x = element_text(
+      angle = 30,
+      hjust = 1,
+      vjust = 1,
+      color = "black"
+    ),
+    axis.text.y = element_text(
+      color = "black"
+    ),
+    axis.title = element_text(
+      face = "bold"
+    ),
+    legend.position = "top",
+    legend.text = ggtext::element_markdown(size = 11),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# 6. Display the graph
+voc_plot
+
+# 7. Save the graph at poster resolution
+ggsave(
+  filename = "outputs/results_figs/WA_HU_VOC_GO_poster.png",
+  plot = voc_plot,
+  width = 12,
+  height = 7,
+  dpi = 300,
+  bg = "white"
+)
+
+# 8. Export the count table
+write_csv(
+  go_category_counts,
+  "outputs/results_figs/WA_HU_VOC_GO_category_counts.csv"
+)
+
+```
+
+### Ester-biosynthesis candidates
+
+```{r}
+# ============================================================
+# COMPARATIVE ESTER-BIOSYNTHESIS CANDIDATE ANALYSIS
+# WA: Wickerhamomyces anomalus NK1
+# HU: Hanseniaspora uvarum AD
+# ============================================================
+
+library(tidyverse)
+
+# 1. Combine annotations from both isolates
+combined_candidates <- bind_rows(
+  WA = eggnog_data,
+  HU = hu_data,
+  .id = "Isolate"
+)
+
+# 2. Search for potential ester-related enzymes
+ester_candidates <- combined_candidates %>%
+  filter(
+    str_detect(
+      str_to_lower(
+        paste(
+          coalesce(Preferred_name, ""),
+          coalesce(Description, "")
+        )
+      ),
+      "eat1|eath|alcohol acetyltransferase|ethanol acetyltransferase|ester biosynthesis|ester synthase|acetyltransferase|esterase"
+    )
+  ) %>%
+dplyr::select(
+    Isolate,
+    query,
+    Preferred_name,
+    Description,
+    EC,
+    KEGG_ko,
+    KEGG_Pathway,
+    PFAMs
+  ) %>%
+  distinct()
+
+# 3. Classify candidate enzymes
+ester_candidates <- ester_candidates %>%
+  mutate(
+    Annotation_text = str_to_lower(
+      paste(
+        coalesce(Preferred_name, ""),
+        coalesce(Description, "")
+      )
+    ),
+
+    Enzyme_Category = case_when(
+      str_detect(Annotation_text, "eat1|eath") ~
+        "Eat1/EatH-like annotations",
+
+      str_detect(
+        Annotation_text,
+        "alcohol acetyltransferase|ethanol acetyltransferase"
+      ) ~ "Alcohol acetyltransferases",
+
+      str_detect(Annotation_text, "esterase") ~
+        "Esterases",
+
+      str_detect(
+        Annotation_text,
+        "ester biosynthesis|ester synthase"
+      ) ~ "Other ester-related enzymes",
+
+      str_detect(Annotation_text, "acetyltransferase") ~
+        "Other acetyltransferases",
+
+      TRUE ~ "Other"
+    )
+  ) %>%
+dplyr::select(-Annotation_text)
+
+# 4. Display candidate gene annotations
+cat("\nESTER-RELATED CANDIDATE GENES\n")
+
+print(ester_candidates, n = Inf)
+
+# 5. Count candidates by isolate and enzyme category
+ester_candidate_counts <- ester_candidates %>%
+  count(Isolate, Enzyme_Category, name = "Gene_Count")
+
+cat("\nCANDIDATE GENE COUNTS\n")
+
+print(ester_candidate_counts, n = Inf)
+
+# 6. Set category order
+enzyme_order <- c(
+  "Eat1/EatH-like annotations",
+  "Alcohol acetyltransferases",
+  "Other ester-related enzymes",
+  "Other acetyltransferases",
+  "Esterases"
+)
+
+# 7. Prepare data for plotting
+ester_candidate_counts <- ester_candidate_counts %>%
+  mutate(
+    Enzyme_Category = factor(
+      Enzyme_Category,
+      levels = enzyme_order
+    ),
+    Isolate = factor(
+      Isolate,
+      levels = c("WA", "HU"),
+      labels = c(
+        "W. anomalus (NK1)",
+        "H. uvarum (AD)"
+      )
+    )
+  )
+
+# 8. Create grouped bar graph
+ester_plot <- ggplot(
+  ester_candidate_counts,
+  aes(
+    x = Enzyme_Category,
+    y = Gene_Count,
+    fill = Isolate
+  )
+) +
+  geom_col(
+    position = position_dodge(width = 0.8),
+    width = 0.7
+  ) +
+  geom_text(
+    aes(label = Gene_Count),
+    position = position_dodge(width = 0.8),
+    vjust = -0.4,
+    size = 3.5
+  ) +
+  scale_fill_manual(
+    values = c(
+      "W. anomalus (NK1)" = "#2878B5",
+      "H. uvarum (AD)" = "#269B8A"
+    ),
+    labels = c(
+      "W. anomalus (NK1)" = "<i>W. anomalus</i> (NK1)",
+      "H. uvarum (AD)" = "<i>H. uvarum</i> (AD)"
+    )
+  ) +
+  scale_x_discrete(
+    labels = function(x) str_wrap(x, width = 22)
+  ) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0, 0.15)),
+    breaks = scales::breaks_pretty()
+  ) +
+  labs(
+    title = "Predicted Ester-Related Enzyme Candidates",
+    subtitle = "Comparative functional annotation of two yeast isolates",
+    x = "Enzyme Category",
+    y = "Number of Candidate Proteins",
+    fill = "Yeast Isolates",
+    caption = paste(
+      "Candidates identified through eggNOG annotation keyword screening.",
+      "Counts do not confirm enzyme activity or actual ester production.",
+      "Eat1/EatH-like annotations require sequence-level validation."
+    )
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 11, color = "grey30"),
+    plot.caption = element_text(
+      size = 8,
+      color = "grey30",
+      hjust = 0
+    ),
+    axis.text.x = element_text(
+      angle = 25,
+      hjust = 1,
+      color = "black"
+    ),
+    axis.text.y = element_text(color = "black"),
+    axis.title = element_text(face = "bold"),
+    legend.position = "top",
+    legend.text = ggtext::element_markdown(size = 11),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+# 9. Display graph
+print(ester_plot)
+
+# 10. Create output directory if necessary
+dir.create("outputs", showWarnings = FALSE, recursive = TRUE)
+
+# 11. Save graph
+ggsave(
+  filename = "outputs/WA_HU_ester_candidate_comparison.png",
+  plot = ester_plot,
+  width = 12,
+  height = 7,
+  dpi = 300,
+  bg = "white"
+)
+
+# 12. Export candidate gene table
+write_csv(
+  ester_candidates,
+  "outputs/WA_HU_ester_biosynthesis_candidates.csv"
+)
+
+# 13. Export candidate count table
+write_csv(
+  ester_candidate_counts,
+  "outputs/WA_HU_ester_candidate_counts.csv"
+)
+
+cat("\nAnalysis completed. Files saved in outputs/.\n")
+```
+
+### Ehrlich pathways
+```{r}
+
+```
+
+
+### Using heatmap
+```{r}
+
+library(tidyverse)
+
+# 1. Combine candidate annotations
+combined_candidates <- bind_rows(
+  WA = voc_candidates,
+  HU = hu_candidates,
+  .id = "Isolate"
+)
+
+# 2. Assign functional gene categories
+voc_heatmap_data <- combined_candidates %>%
+  mutate(
+    Annotation = str_to_lower(paste(Preferred_name, Description)),
+    Gene_Category = case_when(
+      str_detect(Annotation, "eat1|eath|alcohol acetyltransferase|acetyltransferase") ~
+        "Alcohol acetyltransferases",
+      str_detect(Annotation, "alcohol dehydrogenase") ~
+        "Alcohol dehydrogenases",
+      str_detect(Annotation, "aldehyde dehydrogenase") ~
+        "Aldehyde dehydrogenases",
+      str_detect(Annotation, "aminotransferase") ~
+        "Aminotransferases",
+      str_detect(Annotation, "decarboxylase") ~
+        "Decarboxylases",
+      str_detect(Annotation, "acetyl-coa") ~
+        "Acetyl-CoA-related enzymes",
+      str_detect(Annotation, "esterase|ester") ~
+        "Ester-related enzymes",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Gene_Category)) %>%
+  distinct(Isolate, query, Gene_Category)
+
+# 3. Count candidate genes per category and isolate
+heatmap_counts <- voc_heatmap_data %>%
+  count(Gene_Category, Isolate) %>%
+  complete(
+    Gene_Category,
+    Isolate = c("WA", "HU"),
+    fill = list(n = 0)
+  )
+
+# 4. Create heatmap
+heatmap_plot <- ggplot(
+  heatmap_counts,
+  aes(x = Isolate, y = Gene_Category, fill = n)
+) +
+  geom_tile(color = "white", linewidth = 1.2) +
+  geom_text(aes(label = n), size = 5, fontface = "bold") +
+  scale_fill_gradient(
+    low = "#F5F0FA",
+    high = "#68428A",
+    name = "Gene count"
+  ) +
+  scale_x_discrete(labels = c(
+    "WA" = expression(italic("W. anomalus")),
+    "HU" = expression(italic("H. uvarum"))
+  )) +
+  labs(
+    title = "Comparison of VOC-Related Candidate Genes",
+    subtitle = expression(
+      "Functional annotation of " *
+        italic("W. anomalus") * " and " *
+        italic("H. uvarum") * " yeast isolates"
+    ),
+    x = "Yeast Isolate",
+    y = "Functional Gene Category"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(color = "black"),
+    panel.grid = element_blank(),
+    legend.position = "right"
+  )
+
+# 5. Display heatmap
+heatmap_plot
+
+# 6. Save high-resolution image
+ggsave(
+  "outputs/WA_HU_VOC_candidate_heatmap.png",
+  plot = heatmap_plot,
+  width = 9,
+  height = 7,
+  dpi = 300
+)
+
+```
+
+## Build an Annotation eveidence table
 ```{r}
 library(tidyverse)
-library(GO.db)
-library(AnnotationDbi)
 
-# Combine both isolates
 combined_data <- bind_rows(
   WA = eggnog_data,
   HU = hu_data,
   .id = "Isolate"
 )
 
-# Extract GO terms
-go_long <- combined_data %>%
-  filter(!is.na(GOs), GOs != "-") %>%
-  separate_rows(GOs, sep = ",")
-
-go_lookup <- AnnotationDbi::select(
-  GO.db,
-  keys = unique(go_long$GOs),
-  columns = c("TERM", "ONTOLOGY"),
-  keytype = "GOID"
-)
-
-go_annotated <- left_join(
-  go_long,
-  go_lookup,
-  by = c("GOs" = "GOID")
-)
-
-voc_go <- go_annotated %>%
-  filter(
-    ONTOLOGY == "BP",
-    str_detect(
-      str_to_lower(TERM),
-            "ethyl acetate biosynthetic process|ethyl acetate metabolic process|alcohol O-acetyltransferase activity|acyltransferase activity|hydrolase activity|alcohol biosynthetic process|branched-chain amino acid catabolic process|L-phenylalanine catabolic process|tyrosine catabolic process|alcohol dehydrogenase activity|3-methyl-2-oxobutane dehydrogenase|branched-chain-amino-acid transaminase activity"
+voc_evidence <- combined_data %>%
+  mutate(
+    Annotation = str_to_lower(
+      paste(Preferred_name, Description, EC, KEGG_ko, PFAMs)
     )
   ) %>%
-  distinct(Isolate, query, TERM)
+  filter(
+    str_detect(
+      Annotation,
+      "eat1|eath|ethyl acetate|isoamyl acetate|phenylethanol|phenyl ethanol|butyl acetate|ethyl hexanoate|acetate biosynthesis|alcohol acetyltransferase|ester biosynthesis"
+    )
+  ) %>%
+  dplyr::select(
+    Isolate,
+    query,
+    Preferred_name,
+    Description,
+    EC,
+    KEGG_ko,
+    KEGG_Pathway,
+    PFAMs
+  ) %>%
+  distinct()
 
-voc_go_counts <- voc_go %>%
-  count(TERM, Isolate)
-
-ggplot(voc_go_counts,
-       aes(x = reorder(TERM, n), y = n, fill = Isolate)) +
-  geom_col(position = "dodge") +
-  coord_flip() +
-  theme_minimal() +
-  labs(
-    title = "VOC-Related Biological Processes in WA and HU",
-    x = "Biological Process",
-    y = "Number of Annotated Genes",
-    fill = "Isolate"
-  )
-```
-"ethyl acetate biosynthetic process|ethyl acetate metabolic process|alcohol O-acetyltransferase activity|acyltransferase activity|hydrolase activity|alcohol biosynthetic process|branched-chain amino acid catabolic process|L-phenylalanine catabolic process|tyrosine catabolic process|alcohol dehydrogenase activity|3-methyl-2-oxobutane dehydrogenase|branched-chain-amino-acid transaminase activity"
-
-"eat1|eath|ethanol acetyltransferase|alcohol acetyltransferase|acetyltransferase|alpha/beta hydrolase|esterase"
-
-"
-
-### Using ggVennDiagram
-```{r}
-library(ggVennDiagram)
-
-annotation_list <- list(
-  Isolate_A = eggnog_isolateA,
-  Isolate_B = eggnog_isolateB
+write_csv(
+  voc_evidence,
+  "outputs/VOC_annotation_evidence.csv"
 )
 
-gene_sets <- lapply(annotation_list, function(df) {
-  unique(df$Preferred_name[!is.na(df$Preferred_name) & df$Preferred_name != "-"])
-})
-
-ggVennDiagram(gene_sets) +
-  scale_fill_gradient(low = "white", high = "steelblue") +
-  labs(title = "Shared vs. Unique Annotated Gene Names")
+View(voc_evidence)
 ```
 
-## Installation via Conda
-```{bash}
-conda create -n medaka_env -c bioconda -c conda-forge medaka
-conda create -n variant_env -c bioconda -c conda-forge minimap2 samtools bcftools bedtools snpeff htslib
-```
 
-## Calling and Filtering variants
-```{bash}
-# 1. Call variants with medaka
-conda activate medaka_env
-medaka_variant -i data/reads.fastq.gz -r data/reference_genome.fasta -o variant_output -t 8
-
-# 2. Filter weak calls (QUAL >= 20)
-conda activate variant_env
-bcftools filter -i 'QUAL >= 20' -o variant_output/filtered.vcf variant_output/medaka.vcf
-
-# 3. Generate summary statistics & check Ts/Tv
-bcftools stats variant_output/filtered.vcf > variant_output/filtered_stats.txt
-grep -A1 '^# TSTV' variant_output/filtered_stats.txt
-```
-
-## Predicting Biological impact with SnpEff
-```{bash}
-mkdir -p snpeff_data/my_yeast_ref
-cp data/reference_genome.fasta snpeff_data/my_yeast_ref/sequences.fa
-cp data/reference_genes.gff3 snpeff_data/my_yeast_ref/genes.gff
-
-cat <<EOF > snpEff.config
-data.dir = ./snpeff_data
-my_yeast_ref.genome : My_Wild_Yeast_Reference
-EOF
-
-snpEff build -gff3 -v -c snpEff.config -noCheckCds -noCheckProtein my_yeast_ref
-snpEff -c snpEff.config my_yeast_ref variant_output/filtered.vcf > variant_output/annotated.vcf
-```
-
-## Connecting SnpEff to eggNOG-mapper Pathways in R
-```{r}
-library(tidyverse)
-
-eggnog_ref <- read_tsv("funannotate_out/isolate_functional.emapper.annotations", comment = "##", show_col_types = FALSE) %>%
-  rename(query = `#query`)
-
-snpeff_genes <- read_tsv("snpEff_genes.txt", skip = 1, show_col_types = FALSE) %>%
-  rename(GeneName = `#GeneName`)
-
-variants_with_function <- inner_join(snpeff_genes, eggnog_ref, by = c("TranscriptId" = "query"))
-
-candidate_mutated_genes <- variants_with_function %>%
-  filter(variants_impact_HIGH > 0 | variants_impact_MODERATE > 0) %>%
-  select(GeneName, TranscriptId, Preferred_name, variants_impact_HIGH, variants_impact_MODERATE, COG_category, KEGG_Pathway, GOs, Description)
-```

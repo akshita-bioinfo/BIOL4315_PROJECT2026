@@ -118,10 +118,12 @@ outputs/egg_out/HU/*
 !outputs/egg_out/HU/HU_functional.emapper.decorated.gff
 !outputs/egg_out/HU/HU_functional.emapper.annotations.xlsx
 
+# Keep necessary visualization results
 !outputs/egg_out/results
+!outputs/results_figs
+
 # Ignore temporary Excel lock files
 outputs/egg_out/WA/~$*
-
 
 
 
