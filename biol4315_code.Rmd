@@ -533,7 +533,7 @@ voc_plot <- ggplot(
     subtitle = "Comparison of biological process annotations between two yeast isolates",
     x = "Metabolic Functional Category",
     y = "Number of Annotated Genes",
-    fill = "Yeast Isolates",
+    fill = "Yeast Isolate",
     caption = paste(
       "Selected GO biological process terms were grouped into broader functional categories.",
       "Counts represent predicted protein annotations, not gene expression or measured VOC production."
@@ -748,9 +748,9 @@ ester_plot <- ggplot(
   labs(
     title = "Predicted Ester-Related Enzyme Candidates",
     subtitle = "Comparative functional annotation of two yeast isolates",
-    x = "Enzyme Category",
-    y = "Number of Candidate Proteins",
-    fill = "Yeast Isolates",
+    x = "Candidate Enzyme Category",
+    y = "Number of Annotated Proteins",
+    fill = "Yeast Isolate",
     caption = paste(
       "Candidates identified through eggNOG annotation keyword screening.",
       "Counts do not confirm enzyme activity or actual ester production.",
