@@ -1134,7 +1134,17 @@ heatmap_plot
 
 # 6. Save high-resolution image
 ggsave(
-  "outputs/WA_HU_VOC_candidate_heatmap.png",
+  "outputs/results_figs/WA_HU_VOC_candidate_heatmap.png",
+  plot = heatmap_plot,
+  width = 11,
+  height = 8,
+  dpi = 300,
+  bg = "white"
+)
+
+# 7. save high-resolution pdf
+ggsave(
+  "outputs/results_figs/WA_HU_VOC_candidate_heatmap.pdf",
   plot = heatmap_plot,
   width = 11,
   height = 8,
