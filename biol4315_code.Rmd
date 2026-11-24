@@ -311,7 +311,7 @@ voc_candidates <- eggnog_data %>%
 print(voc_candidates, n = 30)
 ```
 
-### save results
+### save eggNOG results
 ```{r}
 write_csv(voc_candidates, "outputs/egg_out/results/WA_VOC_candidate_genes.csv")
 ```
@@ -366,7 +366,6 @@ capture.output(
 
 ### Using ggplot2 (graph1)
 ```{r}
-
 library(tidyverse)
 library(GO.db)
 library(AnnotationDbi)
@@ -440,13 +439,136 @@ ggsave(filename = "outputs/results_figs/WA_HU_VOC_GO.png",
        bg="white")
 ```
 
+
 ### Using ggplot2 (graph2)
 ```{r}
-
+# Seven-category VOC-related GO analysis
+# loading libraries
 library(tidyverse)
+library(GO.db)
+library(AnnotationDbi)
 library(ggtext)
 
-# 1. Define the order of functional categories
+# ------------------------------------------------------------
+# 1. Define eggNOG column names
+# ------------------------------------------------------------
+
+eggnog_columns <- c(
+  "query",
+  "seed_ortholog",
+  "evalue",
+  "score",
+  "eggNOG_OGs",
+  "max_annot_lvl",
+  "COG_category",
+  "Description",
+  "Preferred_name",
+  "GOs",
+  "EC",
+  "KEGG_ko",
+  "KEGG_Pathway",
+  "KEGG_Module",
+  "KEGG_Reaction",
+  "KEGG_rclass",
+  "BRITE",
+  "KEGG_TC",
+  "CAZy",
+  "BiGG_Reaction",
+  "PFAMs"
+)
+
+# ------------------------------------------------------------
+# 2. Read original eggNOG files
+# ------------------------------------------------------------
+
+wa_data <- read.delim(
+  "outputs/egg_out/WA/WA_functional.emapper.annotations",
+  skip = 4,
+  header = FALSE,
+  sep = "\t",
+  col.names = eggnog_columns,
+  check.names = FALSE,
+  stringsAsFactors = FALSE,
+  quote = ""
+)
+
+hu_data <- read.delim(
+  "outputs/egg_out/HU/HU_functional.emapper.annotations",
+  skip = 4,
+  header = FALSE,
+  sep = "\t",
+  col.names = eggnog_columns,
+  check.names = FALSE,
+  stringsAsFactors = FALSE,
+  quote = ""
+)
+
+# ------------------------------------------------------------
+# 3. Verify imported files
+# ------------------------------------------------------------
+
+print(dim(wa_data))
+print(dim(hu_data))
+
+print(names(wa_data))
+
+stopifnot("query" %in% names(wa_data))
+stopifnot("GOs" %in% names(wa_data))
+stopifnot("query" %in% names(hu_data))
+stopifnot("GOs" %in% names(hu_data))
+
+# ------------------------------------------------------------
+# 4. Combine WA and HU
+# ------------------------------------------------------------
+
+combined_data <- bind_rows(
+  WA = wa_data,
+  HU = hu_data,
+  .id = "Isolate"
+)
+
+# ------------------------------------------------------------
+# 5. Extract GO terms
+# ------------------------------------------------------------
+
+go_long <- combined_data %>%
+  filter(
+    !is.na(GOs),
+    GOs != "-",
+    GOs != ""
+  ) %>%
+  separate_rows(GOs, sep = ",") %>%
+  mutate(
+    GOs = str_trim(GOs)
+  ) %>%
+  distinct(Isolate, query, GOs)
+
+# ------------------------------------------------------------
+# 6. Retrieve GO descriptions
+# ------------------------------------------------------------
+
+go_lookup <- AnnotationDbi::select(
+  GO.db,
+  keys = unique(go_long$GOs),
+  columns = c("TERM", "ONTOLOGY"),
+  keytype = "GOID"
+) %>%
+  distinct(GOID, TERM, ONTOLOGY)
+
+go_annotated <- go_long %>%
+  left_join(
+    go_lookup,
+    by = c("GOs" = "GOID")
+  ) %>%
+  filter(
+    ONTOLOGY == "BP",
+    !is.na(TERM)
+  )
+
+# ------------------------------------------------------------
+# 7. Seven functional categories
+# ------------------------------------------------------------
+
 category_order <- c(
   "Sugar breakdown",
   "Fermentation",
@@ -457,36 +579,93 @@ category_order <- c(
   "Fat and lipid metabolism"
 )
 
-# 2. Count genes in each GO category for each isolate
-# Rename WA and HU using the full species names
-go_category_counts <- voc_go_grouped %>%
-  mutate(
-    Isolate = case_when(
-      Isolate == "WA" ~ "W. anomalus (NK1)",
-      Isolate == "HU" ~ "H. uvarum (AD)",
-      TRUE ~ NA_character_
-    )
-  ) %>%
-  filter(!is.na(Isolate)) %>%
-  count(GO_category, Isolate, name = "n_genes")
+# Provisional GO-term keyword rules.
+# These must be checked against the original grouping.
 
-# 3. Set category and isolate order
-go_category_counts <- go_category_counts %>%
+go_category_rules <- tribble(
+  ~GO_category, ~pattern,
+
+  "Sugar breakdown",
+  "sugar catabolic|glucose catabolic|hexose catabolic|monosaccharide catabolic|carbohydrate catabolic",
+
+  "Fermentation",
+  "fermentation",
+
+  "Alcohol production and metabolism",
+  "alcohol biosynthetic|alcohol metabolic",
+
+  "Aldehyde metabolism",
+  "aldehyde biosynthetic|aldehyde metabolic",
+
+  "Aroma compound building blocks",
+  "aromatic compound biosynthetic|aromatic compound metabolic|aromatic amino acid",
+
+  "Amino acid breakdown",
+  "amino acid catabolic|branched-chain amino acid catabolic|amino acid degradation",
+
+  "Fat and lipid metabolism",
+  "lipid metabolic|fatty acid metabolic|fatty acid biosynthetic|fatty acid catabolic"
+)
+
+# ------------------------------------------------------------
+# 8. Assign GO terms to categories
+# ------------------------------------------------------------
+
+voc_go_grouped <- map_dfr(
+  seq_len(nrow(go_category_rules)),
+  function(i) {
+
+    go_annotated %>%
+      filter(
+        str_detect(
+          str_to_lower(TERM),
+          regex(go_category_rules$pattern[i])
+        )
+      ) %>%
+      mutate(
+        GO_category = go_category_rules$GO_category[i]
+      )
+  }
+) %>%
+  distinct(Isolate, query, GO_category)
+
+# ------------------------------------------------------------
+# 9. Count proteins in each category
+# ------------------------------------------------------------
+
+go_category_counts <- voc_go_grouped %>%
+  count(
+    GO_category,
+    Isolate,
+    name = "n_genes"
+  ) %>%
+  complete(
+    GO_category = category_order,
+    Isolate = c("WA", "HU"),
+    fill = list(n_genes = 0)
+  ) %>%
   mutate(
     GO_category = factor(
       GO_category,
-      levels = category_order
+      levels = rev(category_order)
     ),
     Isolate = factor(
       Isolate,
-      levels = c("W. anomalus (NK1)", "H. uvarum (AD)")
+      levels = c("WA", "HU")
     )
   )
 
-# 4. Check the count table before plotting
+# Print counts
 print(go_category_counts, n = Inf)
 
-# 5. Create the grouped bar graph
+# ------------------------------------------------------------
+# 10. Create graph
+# ------------------------------------------------------------
+
+# Set y-axis limit above the maximum count
+y_max <- max(go_category_counts$n_genes, na.rm = TRUE)
+y_limit <- ceiling(y_max * 1.20 / 50) * 50
+
 voc_plot <- ggplot(
   go_category_counts,
   aes(
@@ -495,103 +674,156 @@ voc_plot <- ggplot(
     fill = Isolate
   )
 ) +
+
   geom_col(
     position = position_dodge(width = 0.8),
     width = 0.7
   ) +
+
+  # Numbers at the end of each horizontal bar
   geom_text(
     aes(label = n_genes),
     position = position_dodge(width = 0.8),
-    vjust = -0.4,
-    size = 3.5
+    vjust = -0.35,
+    size = 3.5,
+    color = "black",
+    face = "bold"
   ) +
+
   scale_fill_manual(
     values = c(
-      "W. anomalus (NK1)" = "#2878B5",
-      "H. uvarum (AD)" = "#269B8A"
+      "WA" = "#2878B5",
+      "HU" = "#269B8A"
     ),
-    breaks = c(
-      "W. anomalus (NK1)",
-      "H. uvarum (AD)"
-    ),
+    breaks = c("WA", "HU"),
     labels = c(
-      "W. anomalus (NK1)" = "<i>W. anomalus</i> (NK1)",
-      "H. uvarum (AD)" = "<i>H. uvarum</i> (AD)"
-    ),
-    drop = FALSE
-  ) +
-  scale_x_discrete(
-    drop = FALSE,
-    labels = function(x) stringr::str_wrap(x, width = 22)
-  ) +
-  scale_y_continuous(
-    expand = expansion(mult = c(0, 0.15)),
-    breaks = scales::breaks_pretty()
-  ) +
-  labs(
-    title = "Functional Categories Associated with VOC-Related Metabolism",
-    subtitle = "Comparison of biological process annotations between two yeast isolates",
-    x = "Metabolic Functional Category",
-    y = "Number of Annotated Genes",
-    fill = "Yeast Isolate",
-    caption = paste(
-      "Selected GO biological process terms were grouped into broader functional categories.",
-      "Counts represent predicted protein annotations, not gene expression or measured VOC production."
+      "WA" = "<i>W. anomalus</i>",
+      "HU" = "<i>H. uvarum</i>"
     )
   ) +
-  theme_minimal(base_size = 13) +
+
+  scale_x_discrete(
+    drop = FALSE,
+    labels = function(x) stringr::str_wrap(x, width = 30)
+  ) +
+
+  # Extra space on the right for numerical labels
+  scale_y_continuous(
+    limits = c(0, y_limit),
+    expand = expansion(mult = c(0, 0.12)),
+    breaks = scales::breaks_pretty()
+  ) +
+  
+  labs(
+    title = "VOC-Related Metabolic Functions in Two Yeast Isolates",
+    subtitle = paste(
+      "Comparison of predicted proteins assigned to selected",
+      "Gene Ontology (GO) biological process categories"
+    ),
+    x = "Functional Category",
+    y = "Number of Annotated Proteins",
+    fill = "Yeast Isolate",
+    caption = paste(
+      "Counts represent unique predicted proteins assigned to selected VOC-related GO biological processes.\n",
+      "Proteins may occur in multiple categories, and annotations do not indicate gene expression or measured VOC production."
+    )
+  ) +
+
+  theme_classic() +
+
   theme(
     plot.title = element_text(
       face = "bold",
-      size = 12
+      size = 19,
+      color = "black",
+      margin = margin(b = 8)
     ),
+
     plot.subtitle = element_text(
-      size = 11,
-      color = "grey30"
+      size = 13,
+      color = "black",
+      margin = margin(b = 14)
     ),
+
     plot.caption = element_text(
-      size = 9,
-      color = "grey30",
-      hjust = 0
+      size = 10.5,
+      color = "black",
+      hjust = 0,
+      lineheight = 1.2,
+      margin = margin(t = 16)
     ),
-    axis.text.x = element_text(
-      angle = 30,
-      hjust = 1,
-      vjust = 1,
-      color = "black"
-    ),
+
     axis.text.y = element_text(
-      color = "black"
-    ),
-    axis.title = element_text(
+      size = 8,
+      color = "black",
       face = "bold"
     ),
+
+    axis.text.x = element_text(
+      size = 8,
+      color = "black",
+      face = "bold"
+    ),
+
+    axis.title.x = element_text(
+      face = "bold",
+      size = 11,
+      margin = margin(t = 10)
+    ),
+
+    axis.title.y = element_text(
+      face = "bold",
+      size = 11
+    ),
+
     legend.position = "top",
-    legend.text = ggtext::element_markdown(size = 11),
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank()
+
+    legend.title = element_text(
+      face = "bold",
+      size = 13
+    ),
+
+    legend.text = ggtext::element_markdown(
+      size = 13
+    ),
+
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+
+    plot.margin = margin(
+      t = 15,
+      r = 30,
+      b = 25,
+      l = 15
+    )
   )
 
-# 6. Display the graph
-voc_plot
+# Display graph
+print(voc_plot)
 
-# 7. Save the graph at poster resolution
+# Save high-resolution PNG
 ggsave(
-  filename = "outputs/results_figs/WA_HU_VOC_GO_poster.png",
+  "outputs/results_figs/WA_HU_VOC_GO_poster.png",
   plot = voc_plot,
-  width = 12,
-  height = 7,
+  width = 14,
+  height = 9,
+  units = "in",
   dpi = 300,
   bg = "white"
 )
 
-# 8. Export the count table
-write_csv(
-  go_category_counts,
-  "outputs/results_figs/WA_HU_VOC_GO_category_counts.csv"
+# Save vector PDF
+ggsave(
+  "outputs/results_figs/WA_HU_VOC_GO_poster.pdf",
+  plot = voc_plot,
+  width = 14,
+  height = 9,
+  units = "in",
+  device = cairo_pdf,
+  bg = "white"
 )
-
 ```
+
 
 ### Ester-biosynthesis candidates
 ```{r}
@@ -809,9 +1041,11 @@ write_csv(
 
 cat("\nAnalysis completed. Files saved in outputs/.\n")
 ```
+
+
 ### Using heatmap
 ```{r}
-
+# loading libraries
 library(tidyverse)
 
 # 1. Combine candidate annotations
@@ -860,8 +1094,8 @@ heatmap_plot <- ggplot(
   heatmap_counts,
   aes(x = Isolate, y = Gene_Category, fill = n)
 ) +
-  geom_tile(color = "white", linewidth = 1.2) +
-  geom_text(aes(label = n), size = 5, fontface = "bold") +
+  geom_tile(color = "white", linewidth = 1.5) +
+  geom_text(aes(label = n), size = 6, fontface = "bold") +
   scale_fill_gradient(
     low = "#F5F0FA",
     high = "#68428A",
@@ -881,13 +1115,18 @@ heatmap_plot <- ggplot(
     x = "Yeast Isolate",
     y = "Functional Gene Category"
   ) +
-  theme_minimal(base_size = 14) +
+  theme_minimal(base_size = 16) +
   theme(
-    plot.title = element_text(face = "bold", size = 16),
-    axis.title = element_text(face = "bold"),
-    axis.text = element_text(color = "black"),
+   plot.title = element_text(face = "bold", size = 20),
+    plot.subtitle = element_text(size = 15),
+    axis.title = element_text(face = "bold", size = 16),
+    axis.text.x = element_text(size = 15, color = "black"),
+    axis.text.y = element_text(size = 14, color = "black"),
+    legend.title = element_text(face = "bold", size = 14),
+    legend.text = element_text(size = 13),
     panel.grid = element_blank(),
-    legend.position = "right"
+    legend.position = "right",
+    plot.margin = margin(15, 20, 15, 15)
   )
 
 # 5. Display heatmap
@@ -897,9 +1136,12 @@ heatmap_plot
 ggsave(
   "outputs/WA_HU_VOC_candidate_heatmap.png",
   plot = heatmap_plot,
-  width = 9,
-  height = 7,
-  dpi = 300
+  width = 11,
+  height = 8,
+  units ="in",
+  dpi = 300,
+  device = cairo_pdf,
+  bg = "white"
 )
 
 ```
