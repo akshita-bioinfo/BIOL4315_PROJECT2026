@@ -724,8 +724,7 @@ voc_plot <- ggplot(
     y = "Number of Annotated Proteins",
     fill = "Yeast Isolate",
     caption = paste(
-      "Counts represent unique predicted proteins assigned to selected VOC-related GO biological processes.\n",
-      "Proteins may occur in multiple categories, and annotations do not indicate gene expression or measured VOC production."
+      "Figure 2. Counts represent unique predicted proteins assigned to selected VOC-related GO biological processes"
     )
   ) +
 
@@ -734,19 +733,19 @@ voc_plot <- ggplot(
   theme(
     plot.title = element_text(
       face = "bold",
-      size = 19,
+      size = 20,
       color = "black",
       margin = margin(b = 8)
     ),
 
     plot.subtitle = element_text(
-      size = 13,
+      size = 14,
       color = "black",
       margin = margin(b = 14)
     ),
 
     plot.caption = element_text(
-      size = 10.5,
+      size = 12,
       color = "black",
       hjust = 0,
       lineheight = 1.2,
@@ -754,26 +753,26 @@ voc_plot <- ggplot(
     ),
 
     axis.text.y = element_text(
-      size = 8,
+      size = 10,
       color = "black",
       face = "bold"
     ),
 
     axis.text.x = element_text(
-      size = 8,
+      size = 9,
       color = "black",
       face = "bold"
     ),
 
     axis.title.x = element_text(
       face = "bold",
-      size = 11,
+      size = 13,
       margin = margin(t = 10)
     ),
 
     axis.title.y = element_text(
       face = "bold",
-      size = 11
+      size = 13
     ),
 
     legend.position = "top",
@@ -808,7 +807,7 @@ ggsave(
   width = 14,
   height = 9,
   units = "in",
-  dpi = 300,
+  dpi = 900,
   bg = "white"
 )
 
@@ -822,224 +821,6 @@ ggsave(
   device = cairo_pdf,
   bg = "white"
 )
-```
-
-
-### Ester-biosynthesis candidates
-```{r}
-# ============================================================
-# COMPARATIVE ESTER-BIOSYNTHESIS CANDIDATE ANALYSIS
-# WA: Wickerhamomyces anomalus NK1
-# HU: Hanseniaspora uvarum AD
-# ============================================================
-
-library(tidyverse)
-
-# 1. Combine annotations from both isolates
-combined_candidates <- bind_rows(
-  WA = eggnog_data,
-  HU = hu_data,
-  .id = "Isolate"
-)
-
-# 2. Search for potential ester-related enzymes
-ester_candidates <- combined_candidates %>%
-  filter(
-    str_detect(
-      str_to_lower(
-        paste(
-          coalesce(Preferred_name, ""),
-          coalesce(Description, "")
-        )
-      ),
-      "eat1|eath|alcohol acetyltransferase|ethanol acetyltransferase|ester biosynthesis|ester synthase|acetyltransferase|esterase"
-    )
-  ) %>%
-dplyr::select(
-    Isolate,
-    query,
-    Preferred_name,
-    Description,
-    EC,
-    KEGG_ko,
-    KEGG_Pathway,
-    PFAMs
-  ) %>%
-  distinct()
-
-# 3. Classify candidate enzymes
-ester_candidates <- ester_candidates %>%
-  mutate(
-    Annotation_text = str_to_lower(
-      paste(
-        coalesce(Preferred_name, ""),
-        coalesce(Description, "")
-      )
-    ),
-
-    Enzyme_Category = case_when(
-      str_detect(Annotation_text, "eat1|eath") ~
-        "Eat1/EatH-like annotations",
-
-      str_detect(
-        Annotation_text,
-        "alcohol acetyltransferase|ethanol acetyltransferase"
-      ) ~ "Alcohol acetyltransferases",
-
-      str_detect(Annotation_text, "esterase") ~
-        "Esterases",
-
-      str_detect(
-        Annotation_text,
-        "ester biosynthesis|ester synthase"
-      ) ~ "Other ester-related enzymes",
-
-      str_detect(Annotation_text, "acetyltransferase") ~
-        "Other acetyltransferases",
-
-      TRUE ~ "Other"
-    )
-  ) %>%
-dplyr::select(-Annotation_text)
-
-# 4. Display candidate gene annotations
-cat("\nESTER-RELATED CANDIDATE GENES\n")
-
-print(ester_candidates, n = Inf)
-
-# 5. Count candidates by isolate and enzyme category
-ester_candidate_counts <- ester_candidates %>%
-  count(Isolate, Enzyme_Category, name = "Gene_Count")
-
-cat("\nCANDIDATE GENE COUNTS\n")
-
-print(ester_candidate_counts, n = Inf)
-
-# 6. Set category order
-enzyme_order <- c(
-  "Eat1/EatH-like annotations",
-  "Alcohol acetyltransferases",
-  "Other ester-related enzymes",
-  "Other acetyltransferases",
-  "Esterases"
-)
-
-# 7. Prepare data for plotting
-ester_candidate_counts <- ester_candidate_counts %>%
-  mutate(
-    Enzyme_Category = factor(
-      Enzyme_Category,
-      levels = enzyme_order
-    ),
-    Isolate = factor(
-      Isolate,
-      levels = c("WA", "HU"),
-      labels = c(
-        "W. anomalus (NK1)",
-        "H. uvarum (AD)"
-      )
-    )
-  )
-
-# 8. Create grouped bar graph
-ester_plot <- ggplot(
-  ester_candidate_counts,
-  aes(
-    x = Enzyme_Category,
-    y = Gene_Count,
-    fill = Isolate
-  )
-) +
-  geom_col(
-    position = position_dodge(width = 0.8),
-    width = 0.7
-  ) +
-  geom_text(
-    aes(label = Gene_Count),
-    position = position_dodge(width = 0.8),
-    vjust = -0.4,
-    size = 3.5
-  ) +
-  scale_fill_manual(
-    values = c(
-      "W. anomalus (NK1)" = "#2878B5",
-      "H. uvarum (AD)" = "#269B8A"
-    ),
-    labels = c(
-      "W. anomalus (NK1)" = "<i>W. anomalus</i> (NK1)",
-      "H. uvarum (AD)" = "<i>H. uvarum</i> (AD)"
-    )
-  ) +
-  scale_x_discrete(
-    labels = function(x) str_wrap(x, width = 22)
-  ) +
-  scale_y_continuous(
-    expand = expansion(mult = c(0, 0.15)),
-    breaks = scales::breaks_pretty()
-  ) +
-  labs(
-    title = "Predicted Ester-Related Enzyme Candidates",
-    subtitle = "Comparative functional annotation of two yeast isolates",
-    x = "Candidate Enzyme Category",
-    y = "Number of Annotated Proteins",
-    fill = "Yeast Isolate",
-    caption = paste(
-      "Candidates identified through eggNOG annotation keyword screening.",
-      "Counts do not confirm enzyme activity or actual ester production.",
-      "Eat1/EatH-like annotations require sequence-level validation."
-    )
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    plot.title = element_text(face = "bold", size = 16),
-    plot.subtitle = element_text(size = 11, color = "grey30"),
-    plot.caption = element_text(
-      size = 8,
-      color = "grey30",
-      hjust = 0
-    ),
-    axis.text.x = element_text(
-      angle = 25,
-      hjust = 1,
-      color = "black"
-    ),
-    axis.text.y = element_text(color = "black"),
-    axis.title = element_text(face = "bold"),
-    legend.position = "top",
-    legend.text = ggtext::element_markdown(size = 11),
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank()
-  )
-
-# 9. Display graph
-print(ester_plot)
-
-# 10. Create output directory if necessary
-dir.create("outputs", showWarnings = FALSE, recursive = TRUE)
-
-# 11. Save graph
-ggsave(
-  filename = "outputs/WA_HU_ester_candidate_comparison.png",
-  plot = ester_plot,
-  width = 12,
-  height = 7,
-  dpi = 300,
-  bg = "white"
-)
-
-# 12. Export candidate gene table
-write_csv(
-  ester_candidates,
-  "outputs/WA_HU_ester_biosynthesis_candidates.csv"
-)
-
-# 13. Export candidate count table
-write_csv(
-  ester_candidate_counts,
-  "outputs/WA_HU_ester_candidate_counts.csv"
-)
-
-cat("\nAnalysis completed. Files saved in outputs/.\n")
 ```
 
 
@@ -1110,10 +891,11 @@ heatmap_plot <- ggplot(
     subtitle = expression(
       "Functional annotation of " *
         italic("W. anomalus") * " and " *
-        italic("H. uvarum") * " yeast isolates"
+        italic("H. uvarum") * " yeast isolates",
     ),
     x = "Yeast Isolate",
-    y = "Functional Gene Category"
+    y = "Functional Gene Category",
+    caption = "Figure 3. VOC-related candidate genes."
   ) +
   theme_minimal(base_size = 16) +
   theme(
@@ -1126,7 +908,11 @@ heatmap_plot <- ggplot(
     legend.text = element_text(size = 13),
     panel.grid = element_blank(),
     legend.position = "right",
-    plot.margin = margin(15, 20, 15, 15)
+    plot.margin = margin(15, 20, 15, 15),
+    plot.caption = element_text(
+      hjust =0.5,
+      size = 11
+    )
   )
 
 # 5. Display heatmap
